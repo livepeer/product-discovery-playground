@@ -1,5 +1,4 @@
 import { gql, useQuery } from "@apollo/client";
-import { LAYOUT_MAX_WIDTH } from "@layouts/main";
 import { Box, Button, Container, Text } from "@livepeer/design-system";
 import { useAccountAddress } from "hooks";
 
@@ -47,7 +46,7 @@ const InactiveWarning = () => {
   }
 
   return (
-    <Container css={{ maxWidth: LAYOUT_MAX_WIDTH, mb: "$5" }}>
+    <Container css={{  mb: "$5" }}>
       <Box
         css={{
           mt: "$5",
