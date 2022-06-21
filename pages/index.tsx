@@ -1,14 +1,17 @@
 import CreateStreamDialog from "@components/CreateStreamDialog";
 import { getLayout } from "@layouts/main";
 import {
-  Box, Button, Container, Flex,
-  Heading, Text
+  Box,
+  Button,
+  Container,
+  Flex,
+  Heading,
+  Text,
 } from "@livepeer/design-system";
 import { useState } from "react";
 import { useAccount } from "wagmi";
 
 const Home = () => {
-
   const account = useAccount();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -53,7 +56,12 @@ const Home = () => {
               live video content and playback your live stream with the
               underlying Livepeer protocol.
             </Text>
-            <Button disabled={!account?.data?.address} variant="primary" size={2} onClick={() => setIsOpen((curr) => !curr)}>
+            <Button
+              disabled={!account?.data?.address}
+              variant="primary"
+              size={2}
+              onClick={() => setIsOpen((curr) => !curr)}
+            >
               Generate stream key
             </Button>
           </Box>

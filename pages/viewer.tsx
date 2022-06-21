@@ -111,11 +111,7 @@ const Viewer = () => {
               <Box css={{ mt: "$4" }}>
                 <Text css={{ mb: "$3" }}>Stream parameters:</Text>
                 <CodeBlock id="streamkey" css={{ mb: "$3" }}>
-                  {JSON.stringify(
-                    JSON.parse(Buffer.from(streamKey, "base64").toString()),
-                    null,
-                    2
-                  )}
+                  {JSON.stringify(streamParams, null, 2)}
                 </CodeBlock>
                 <Box css={{ position: "relative" }}>
                   <Player src="https://media.w3.org/2010/05/sintel/trailer_hd.mp4" />
@@ -134,7 +130,12 @@ const Viewer = () => {
                           fontWeight: 600,
                         }}
                       >
-                        {ensName}
+                        {ensName
+                          ? ensName
+                          : streamParams?.message?.owner?.replace(
+                              streamParams?.message?.owner?.slice(5, 38),
+                              "…"
+                            ) ?? ""}
                       </Text>
                       <CheckCircledIcon />
                     </Flex>
