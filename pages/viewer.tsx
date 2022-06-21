@@ -27,6 +27,7 @@ const Viewer = () => {
   //   }
   // `);
 
+  const [isHover, setIsHover] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [streamKey, setStreamKey] = useState("");
   const [ensName, setEnsName] = useState("");
@@ -122,22 +123,36 @@ const Viewer = () => {
                       right: 12,
                     }}
                   >
-                    <Flex align="center">
-                      <Text
-                        size="2"
-                        css={{
-                          mr: "$1",
-                          fontWeight: 600,
-                        }}
-                      >
-                        {ensName
-                          ? ensName
-                          : streamParams?.message?.owner?.replace(
-                              streamParams?.message?.owner?.slice(5, 38),
-                              "…"
-                            ) ?? ""}
-                      </Text>
-                      <CheckCircledIcon />
+                    <Flex
+                      css={{
+                        height: 20,
+                        color: "white",
+                        "&:hover": {
+                          color: "hsla(0,100%,100%,.85)",
+                        },
+                        cursor: "pointer"
+                      }}
+                      align="center"
+                      onMouseEnter={() => setIsHover(true)}
+                      onMouseLeave={() => setIsHover(false)}
+                    >
+                      {isHover && (
+                        <Text
+                          size="2"
+                          css={{
+                            mr: "$1",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {ensName
+                            ? ensName
+                            : streamParams?.message?.owner?.replace(
+                                streamParams?.message?.owner?.slice(5, 38),
+                                "…"
+                              ) ?? ""}
+                        </Text>
+                      )}
+                      <Box as={CheckCircledIcon} />
                     </Flex>
                   </Box>
                 </Box>
