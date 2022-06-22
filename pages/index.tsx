@@ -1,9 +1,7 @@
 import { CodeBlock } from "@components/CodeBlock";
 import CreateStreamDialog, {
-  DOMAIN,
   SignedStream,
   Stream,
-  TYPES,
 } from "@components/CreateStreamDialog";
 import { getLayout } from "@layouts/main";
 import { l1Provider } from "@lib/chains";

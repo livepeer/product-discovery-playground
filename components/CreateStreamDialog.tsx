@@ -18,19 +18,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSignTypedData, useAccount, useProvider } from "wagmi";
 import { CodeBlock } from "./CodeBlock";
 import Spinner from "./Spinner";
-
-export const DOMAIN = {
-  name: "Livepeer",
-  version: "1.0.0",
-  chainId: 42161,
-} as const;
-
-export const TYPES = {
-  Stream: [
-    { name: "name", type: "string" },
-    { name: "blockHash", type: "string" },
-  ],
-};
+import { DOMAIN, TYPES } from "../constants/typedData";
 
 export type Stream = {
   name: string;
