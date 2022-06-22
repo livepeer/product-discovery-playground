@@ -14,26 +14,32 @@ import {
   Label,
   Badge,
 } from "@livepeer/design-system";
-import { block } from "apollo/resolvers/Query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSignTypedData, useAccount, useProvider } from "wagmi";
 import { CodeBlock } from "./CodeBlock";
 import Spinner from "./Spinner";
 
-// All properties on a domain are optional
 export const DOMAIN = {
   name: "Livepeer",
   version: "1.0.0",
   chainId: 42161,
-};
+} as const;
 
-// The named list of all type definitions
 export const TYPES = {
   Stream: [
     { name: "name", type: "string" },
     { name: "blockHash", type: "string" },
-    { name: "owner", type: "address" },
   ],
+};
+
+export type Stream = {
+  name: string;
+  blockHash: string;
+};
+
+export type SignedStream = {
+  message: Stream;
+  signature: string;
 };
 
 const CreateStreamDialog = ({
@@ -64,7 +70,7 @@ const CreateStreamDialog = ({
     }, 5000);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [setUpdateTime]);
 
   useEffect(() => {
     (async () => {
@@ -77,11 +83,13 @@ const CreateStreamDialog = ({
     })();
   }, [updateTime]);
 
-  const value = {
-    name: streamName,
-    blockHash: blockHashAndNumber.hash ?? "",
-    owner: data?.address ?? "",
-  };
+  const value: Stream = useMemo(
+    () => ({
+      name: streamName,
+      blockHash: blockHashAndNumber.hash ?? "",
+    }),
+    [streamName, blockHashAndNumber]
+  );
 
   const { signTypedDataAsync, variables } = useSignTypedData({
     domain: DOMAIN,
@@ -89,10 +97,13 @@ const CreateStreamDialog = ({
     value,
   });
 
+  const signedStream: SignedStream = useMemo(
+    () => ({ message: value, signature: signature }),
+    [value, signature]
+  );
+
   const streamKey = variables
-    ? Buffer.from(
-        JSON.stringify({ message: variables.value, signature: signature })
-      ).toString("base64")
+    ? Buffer.from(JSON.stringify(signedStream)).toString("base64")
     : undefined;
 
   return (

@@ -1,5 +1,10 @@
 import { CodeBlock } from "@components/CodeBlock";
-import CreateStreamDialog from "@components/CreateStreamDialog";
+import CreateStreamDialog, {
+  DOMAIN,
+  SignedStream,
+  Stream,
+  TYPES,
+} from "@components/CreateStreamDialog";
 import { getLayout } from "@layouts/main";
 import { l1Provider } from "@lib/chains";
 import {
@@ -12,6 +17,7 @@ import {
   TextField,
 } from "@livepeer/design-system";
 import { CheckCircledIcon } from "@modulz/radix-icons";
+import { verifyTypedData } from "ethers/lib/utils";
 import { useEffect, useMemo, useState } from "react";
 import { Player } from "video-react";
 import { useAccount } from "wagmi";
@@ -23,30 +29,43 @@ const Home = () => {
 
   const [isHover, setIsHover] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [streamKey, setStreamKey] = useState("");
+  const [ethAddress, setEthAddress] = useState("");
   const [ensName, setEnsName] = useState("");
 
-  const streamParams = useMemo(
-    () =>
-      streamKey
-        ? JSON.parse(Buffer.from(streamKey, "base64").toString())
-        : null,
-    [streamKey]
-  );
+  // const streamParams: SignedStream | null = useMemo(
+  //   () =>
+  //     streamKey
+  //       ? (JSON.parse(
+  //           Buffer.from(streamKey, "base64").toString()
+  //         ) as SignedStream)
+  //       : null,
+  //   [streamKey]
+  // );
+
+  // const recoveredAddress = useMemo(
+  //   () =>
+  //     streamParams?.message && streamParams?.signature
+  //       ? verifyTypedData(
+  //           DOMAIN,
+  //           TYPES,
+  //           streamParams?.message,
+  //           streamParams?.signature
+  //         )
+  //       : null,
+  //   [streamParams]
+  // );
 
   useEffect(() => {
     (async () => {
-      if (streamParams?.message?.owner) {
-        const name = await l1Provider.lookupAddress(
-          streamParams?.message?.owner
-        );
+      if (ethAddress) {
+        const name = await l1Provider.lookupAddress(ethAddress);
 
         if (name) {
           setEnsName(name);
         }
       }
     })();
-  }, [streamParams]);
+  }, [ethAddress]);
 
   return (
     <>
@@ -119,15 +138,15 @@ const Home = () => {
               View
             </Heading>
             <Text css={{ mb: "$3" }}>
-              Watch content based on a signed stream key.
+              Watch content based on an Ethereum address.
             </Text>
             <TextField
-              placeholder="Base64-encoded stream key"
+              placeholder="Ethereum address (0xab9...)"
               size="2"
               css={{
                 mb: "$2",
               }}
-              onChange={(e) => setStreamKey(e.target.value)}
+              onChange={(e) => setEthAddress(e.target.value)}
             />
             <Button
               variant="primary"
@@ -137,11 +156,11 @@ const Home = () => {
               Verify & View Stream
             </Button>
 
-            {isOpen && streamKey && (
+            {isOpen && ethAddress && (
               <Box css={{ mt: "$4" }}>
                 <Text css={{ mb: "$3" }}>Stream parameters:</Text>
-                <CodeBlock id="streamkey" css={{ mb: "$3" }}>
-                  {JSON.stringify(streamParams, null, 2)}
+                <CodeBlock id="ethAddress" css={{ mb: "$3" }}>
+                  {JSON.stringify(ethAddress, null, 2)}
                 </CodeBlock>
                 <Box css={{ position: "relative" }}>
                   <Player src="https://media.w3.org/2010/05/sintel/trailer_hd.mp4" />
@@ -175,8 +194,8 @@ const Home = () => {
                         >
                           {ensName
                             ? ensName
-                            : streamParams?.message?.owner?.replace(
-                                streamParams?.message?.owner?.slice(5, 38),
+                            : ethAddress?.replace(
+                                ethAddress?.slice(5, 38),
                                 "…"
                               ) ?? ""}
                         </Text>
