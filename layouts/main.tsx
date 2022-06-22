@@ -9,12 +9,11 @@ import {
   Button,
   Container,
   DesignSystemProvider,
-  Flex, SnackbarProvider,
-  themes
+  Flex,
+  SnackbarProvider,
+  themes,
 } from "@livepeer/design-system";
-import {
-  EyeOpenIcon
-} from "@modulz/radix-icons";
+import { EyeOpenIcon } from "@modulz/radix-icons";
 import { CHAIN_INFO, DEFAULT_CHAIN_ID } from "lib/chains";
 import { ThemeProvider } from "next-themes";
 import Head from "next/head";
@@ -28,7 +27,7 @@ import {
   useAccountAddress,
   useActiveChain,
   useMutations,
-  useOnClickOutside
+  useOnClickOutside,
 } from "../hooks";
 
 const themeMap = {};
@@ -198,11 +197,36 @@ const Layout = ({ children, title = "Livepeer Product Discovery" }) => {
                                   },
                                 }}
                               >
-                                Stream
+                                Create Stream Key
                               </Button>
                             </Link>
                           </Box>
                           <Box css={{}}>
+                            <Link passHref href="/stream">
+                              <Button
+                                size="3"
+                                css={{
+                                  ml: "$2",
+                                  bc: asPath.includes("/stream")
+                                    ? "hsla(0,100%,100%,.05)"
+                                    : "transparent",
+                                  color: "white",
+                                  "&:hover": {
+                                    bc: "hsla(0,100%,100%,.1)",
+                                  },
+                                  "&:active": {
+                                    bc: "hsla(0,100%,100%,.15)",
+                                  },
+                                  "&:disabled": {
+                                    opacity: 0.5,
+                                  },
+                                }}
+                              >
+                                View Stream
+                              </Button>
+                            </Link>
+                          </Box>
+                          {/* <Box css={{}}>
                             <Link passHref href="/video-on-demand">
                               <Button
                                 size="3"
@@ -227,7 +251,7 @@ const Layout = ({ children, title = "Livepeer Product Discovery" }) => {
                                 Video On Demand
                               </Button>
                             </Link>
-                          </Box>
+                          </Box> */}
                         </Flex>
 
                         <Flex css={{ ml: "auto" }}>
@@ -285,10 +309,7 @@ const Layout = ({ children, title = "Livepeer Product Discovery" }) => {
                       backgroundColor: "$loContrast",
                     }}
                   >
-                    <Box css={{ width: "100%" }}>
-                     
-                      {children}
-                    </Box>
+                    <Box css={{ width: "100%" }}>{children}</Box>
                   </Flex>
                 </Box>
               </Box>

@@ -37,7 +37,7 @@ const CreateStreamDialog = ({
 }: {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onCreate: (streamName: string) => Promise<void>;
+  onCreate: (stream: Stream) => Promise<void>;
 }) => {
   const [creating, setCreating] = useState(false);
   const [streamName, setStreamName] = useState("");
@@ -124,6 +124,11 @@ const CreateStreamDialog = ({
             <CodeBlock id="streamkey" css={{}}>
               {streamKey}
             </CodeBlock>
+            <Flex css={{ jc: "flex-end", gap: "$3", mt: "$4" }}>
+              <AlertDialogCancel asChild>
+                <Button size="2">Done</Button>
+              </AlertDialogCancel>
+            </Flex>
           </Box>
         ) : (
           <Box
@@ -139,6 +144,8 @@ const CreateStreamDialog = ({
                 const signature = await signTypedDataAsync();
 
                 setSignature(signature);
+
+                onCreate(value);
               } catch (error) {
                 console.error(error);
               } finally {
@@ -158,19 +165,6 @@ const CreateStreamDialog = ({
                 onChange={(e) => setStreamName(e.target.value)}
                 placeholder="DayDAO Monday Hangouts"
               />
-              {/* <Label htmlFor="nft">NFT Gating Address (optional)</Label>
-              <TextField
-                size="2"
-                type="text"
-                id="nftAddress"
-                autoFocus={true}
-                value={nftAddress}
-                onChange={(e) => setNftAddress(e.target.value)}
-                placeholder="0xea1234..."
-              /> */}
-              {/* <Text size="1" css={{ fontWeight: 500, color: "$gray9" }}>
-              A-Z, a-z, 0-9, -, _, ~ only
-            </Text> */}
             </Flex>
             <AlertDialogDescription asChild>
               <Text
@@ -178,8 +172,9 @@ const CreateStreamDialog = ({
                 variant="gray"
                 css={{ mt: "$2", fontSize: "$2", mb: "$4" }}
               >
-                Stream keys are a EIP-712 signed representation of the
-                permissions and rules around a stream.
+                Stream keys are an EIP-712 signed representation of the
+                parameters for a stream, with the latest Ethereum blockhash for
+                proof-of-age.
               </Text>
             </AlertDialogDescription>
 
