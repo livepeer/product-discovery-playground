@@ -12,6 +12,7 @@ import {
   TextField,
 } from "@livepeer/design-system";
 import { CheckCircledIcon } from "@modulz/radix-icons";
+import { block } from "apollo/resolvers/Query";
 import { useEffect, useState } from "react";
 import { Player } from "video-react";
 import { useAccount } from "wagmi";
@@ -66,10 +67,14 @@ export const StreamPage = ({
 
   useEffect(() => {
     if (window && localStorage) {
-      const blockHash = localStorage.getItem(BLOCK_HASH_KEY);
+      const blockHashLocal = localStorage.getItem(BLOCK_HASH_KEY);
 
-      if (blockHash) {
-        setBlockHash(blockHash);
+      if (blockHashLocal) {
+        setBlockHash(blockHashLocal);
+      } else {
+        setBlockHash(
+          "0x5dd148da1733a676f31577bfe815032b7e6c44ee9a77fd10d61cf5980e76523a"
+        );
       }
     }
   }, []);
@@ -178,7 +183,7 @@ export const StreamPage = ({
                     {JSON.stringify(ethAddress, null, 2)}
                   </CodeBlock> */}
                   <Box css={{ position: "relative" }}>
-                    <MistPlayer src="https://media.w3.org/2010/05/sintel/trailer_hd.mp4" />
+                    <MistPlayer proof="" />
                     <Box
                       css={{
                         position: "absolute",
@@ -186,23 +191,23 @@ export const StreamPage = ({
                         right: 12,
                       }}
                     >
-                      <Flex
-                        css={{
-                          height: 20,
-                          color: "white",
-                          "&:hover": {
-                            color: "hsla(0,100%,100%,.85)",
-                          },
-                          cursor: "pointer",
-                        }}
-                        align="center"
-                        onMouseEnter={() => setIsHover(true)}
-                        onMouseLeave={() => setIsHover(false)}
-                      >
-                        {isHover && (
-                          <Text
-                            size="2"
+                      <Box>
+                        <Flex
+                          css={{
+                            color: "white",
+                            "&:hover": {
+                              color: "hsla(0,100%,100%,.85)",
+                            },
+                            cursor: "pointer",
+                            justifyContent: "flex-end",
+                          }}
+                          align="center"
+                          onMouseEnter={() => setIsHover(true)}
+                          onMouseLeave={() => setIsHover(false)}
+                        >
+                          <Box
                             css={{
+                              fontSize: "$2",
                               mr: "$1",
                               fontWeight: 600,
                             }}
@@ -213,10 +218,29 @@ export const StreamPage = ({
                                   ethAddress.address?.slice(5, 38),
                                   "…"
                                 ) ?? ""}
-                          </Text>
-                        )}
-                        <Box as={CheckCircledIcon} />
-                      </Flex>
+                          </Box>
+                          <Box as={CheckCircledIcon} />
+                        </Flex>
+                        <Flex css={{ justifyContent: "flex-end" }}>
+                          {isHover && blockHash && (
+                            <Text
+                              size="2"
+                              css={{
+                                mt: "$1",
+                                fontWeight: 600,
+                              }}
+                            >
+                              Block Hash:{" "}
+                              {blockHash
+                                ? blockHash?.replace(
+                                    blockHash?.slice(5, 62),
+                                    "…"
+                                  )
+                                : ""}
+                            </Text>
+                          )}
+                        </Flex>
+                      </Box>
                     </Box>
                   </Box>
                 </Box>

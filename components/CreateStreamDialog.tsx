@@ -13,6 +13,7 @@ import {
   Text,
   Label,
   Badge,
+  Link,
 } from "@livepeer/design-system";
 import { useEffect, useMemo, useState } from "react";
 import { useSignTypedData, useAccount, useProvider } from "wagmi";
@@ -101,23 +102,26 @@ const CreateStreamDialog = ({
           <Heading size="1">Sign a new stream key</Heading>
         </AlertDialogTitle>
 
-        <Text css={{ fontWeight: 700, mt: "$2" }}>Current Block</Text>
-        <Text css={{ mt: "$2" }}>
-          Number: <Badge variant="primary">{blockHashAndNumber.number}</Badge>
-        </Text>
-        <Text>
-          Hash:{" "}
-          <Badge variant="primary">
-            {blockHashAndNumber.hash.replace(
-              blockHashAndNumber.hash.slice(5, 60),
-              "…"
-            )}
-          </Badge>
-        </Text>
+        <Text css={{ mt: "$3" }}>Latest Ethereum Block:</Text>
+        <Link
+          target="_blank"
+          rel="noopener noreferrer"
+          href={`https://etherscan.io/block/${blockHashAndNumber.hash}`}
+        >
+          <Flex align="center" css={{ mt: "$1" }}>
+            <Text css={{ fontWeight: 700 }}>#{blockHashAndNumber.number}</Text>
+            <Badge css={{ ml: "$1" }} variant="primary">
+              {blockHashAndNumber.hash.replace(
+                blockHashAndNumber.hash.slice(5, 60),
+                "…"
+              )}
+            </Badge>
+          </Flex>
+        </Link>
 
         {signature && streamKey ? (
           <Box>
-            <Text css={{ mt: "$2", mb: "$4" }}>
+            <Text css={{ mt: "$3", mb: "$4" }}>
               {`Stream key created! Please copy your ${streamKey.length} character base64-encoded stream key and store it in a safe place:`}
             </Text>
 

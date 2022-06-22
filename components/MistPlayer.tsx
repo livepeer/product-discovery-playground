@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-export const MistPlayer = ({ proof, index }) => {
+export const MistPlayer = ({ proof }) => {
   useEffect(() => {
     setTimeout(() => {
       var a = function () {
