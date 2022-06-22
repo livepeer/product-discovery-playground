@@ -74,11 +74,10 @@ const CreateStreamDialog = ({
           <Heading size="1">Sign a new stream key</Heading>
         </AlertDialogTitle>
 
-        {signature ? (
+        {signature && streamKey ? (
           <Box>
             <Text css={{ mt: "$2", mb: "$4" }}>
-              Stream key created! Please copy your base64-encoded stream key and
-              store it in a safe place:
+              {`Stream key created! Please copy your ${streamKey.length} character base64-encoded stream key and store it in a safe place:`}
             </Text>
 
             <CodeBlock id="streamkey" css={{}}>

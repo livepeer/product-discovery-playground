@@ -198,18 +198,18 @@ const Layout = ({ children, title = "Livepeer Product Discovery" }) => {
                                   },
                                 }}
                               >
-                                Create Stream
+                                Stream
                               </Button>
                             </Link>
                           </Box>
                           <Box css={{}}>
-                            <Link passHref href="/viewer">
+                            <Link passHref href="/video-on-demand">
                               <Button
                                 size="3"
                                 css={{
                                   ml: "$2",
                                   bc:
-                                    asPath === "/viewer"
+                                    asPath === "/video-on-demand"
                                       ? "hsla(0,100%,100%,.05)"
                                       : "transparent",
                                   color: "white",
@@ -224,7 +224,7 @@ const Layout = ({ children, title = "Livepeer Product Discovery" }) => {
                                   },
                                 }}
                               >
-                                View Stream
+                                Video On Demand
                               </Button>
                             </Link>
                           </Box>

@@ -1,5 +1,5 @@
-import { gql, useQuery } from "@apollo/client";
 import { CodeBlock } from "@components/CodeBlock";
+import CreateStreamDialog from "@components/CreateStreamDialog";
 import { getLayout } from "@layouts/main";
 import { l1Provider } from "@lib/chains";
 import {
@@ -11,21 +11,15 @@ import {
   Text,
   TextField,
 } from "@livepeer/design-system";
-import { CheckCircledIcon, CheckIcon, PersonIcon } from "@modulz/radix-icons";
+import { CheckCircledIcon } from "@modulz/radix-icons";
 import { useEffect, useMemo, useState } from "react";
 import { Player } from "video-react";
+import { useAccount } from "wagmi";
 
 const Viewer = () => {
-  // const { data: protocolData } = useQuery(gql`
-  //   {
-  //     protocol(id: "0") {
-  //       id
-  //       currentRound {
-  //         id
-  //       }
-  //     }
-  //   }
-  // `);
+  const account = useAccount();
+
+  const [isStreamDialogOpen, setIsStreamDialogOpen] = useState(false);
 
   const [isHover, setIsHover] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -85,15 +79,49 @@ const Viewer = () => {
               },
             }}
           >
-            View
+            Upload
           </Heading>
 
           <Box css={{ maxWidth: 600 }}>
             <Text css={{ mb: "$3" }}>
-              Watch content based on a signed stream key.
+              Upload a video to decentralized storage (IPFS) and play back with
+              the underlying Livepeer protocol.
+            </Text>
+            <Button
+              disabled={!account?.data?.address}
+              variant="primary"
+              size={2}
+              onClick={() => setIsStreamDialogOpen((curr) => !curr)}
+            >
+              Upload Video
+            </Button>
+          </Box>
+          <Box css={{ mt: "$8", maxWidth: 600 }}>
+            <Heading
+              as="h1"
+              css={{
+                color: "$hiContrast",
+                fontSize: "$3",
+                fontWeight: 600,
+                mb: "$5",
+                display: "none",
+                alignItems: "center",
+                "@bp2": {
+                  fontSize: "$7",
+                },
+                "@bp3": {
+                  display: "flex",
+                  fontSize: "$7",
+                },
+              }}
+            >
+              View
+            </Heading>
+            <Text css={{ mb: "$3" }}>
+              Watch content based on a CID.
             </Text>
             <TextField
-              placeholder="Base64-encoded stream key"
+              placeholder="IPFS CID"
               size="2"
               css={{
                 mb: "$2",
@@ -105,7 +133,7 @@ const Viewer = () => {
               size={2}
               onClick={() => setIsOpen((curr) => !curr)}
             >
-              Verify & View Stream
+              Verify & View VOD
             </Button>
 
             {isOpen && streamKey && (
@@ -130,7 +158,7 @@ const Viewer = () => {
                         "&:hover": {
                           color: "hsla(0,100%,100%,.85)",
                         },
-                        cursor: "pointer"
+                        cursor: "pointer",
                       }}
                       align="center"
                       onMouseEnter={() => setIsHover(true)}
@@ -159,6 +187,11 @@ const Viewer = () => {
               </Box>
             )}
           </Box>
+          <CreateStreamDialog
+            onCreate={async (name) => {}}
+            onOpenChange={(isOpen) => setIsStreamDialogOpen(isOpen)}
+            isOpen={isStreamDialogOpen}
+          />
         </Flex>
       </Container>
     </>
