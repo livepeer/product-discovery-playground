@@ -1,3 +1,4 @@
+import { l1Provider } from "@lib/chains";
 import {
   Box,
   Button,
@@ -11,9 +12,11 @@ import {
   Heading,
   Text,
   Label,
+  Badge,
 } from "@livepeer/design-system";
-import { useState } from "react";
-import { useSignTypedData, useAccount } from "wagmi";
+import { block } from "apollo/resolvers/Query";
+import { useEffect, useState } from "react";
+import { useSignTypedData, useAccount, useProvider } from "wagmi";
 import { CodeBlock } from "./CodeBlock";
 import Spinner from "./Spinner";
 
@@ -28,7 +31,7 @@ export const DOMAIN = {
 export const TYPES = {
   Stream: [
     { name: "name", type: "string" },
-    // { name: "nftGateAddress", type: "string" },
+    { name: "blockHash", type: "string" },
     { name: "owner", type: "address" },
   ],
 };
@@ -45,13 +48,38 @@ const CreateStreamDialog = ({
   const [creating, setCreating] = useState(false);
   const [streamName, setStreamName] = useState("");
   const [signature, setSignature] = useState("");
-  // const [nftAddress, setNftAddress] = useState("");
+  const [blockHashAndNumber, setBlockHashAndNumber] = useState({
+    hash: "",
+    number: -1,
+  });
+  const [updateTime, setUpdateTime] = useState(-1);
 
   const { data } = useAccount();
 
+  useEffect(() => {
+    setUpdateTime(Date.now());
+
+    const intervalId = setInterval(() => {
+      setUpdateTime(Date.now());
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const blockNumber = await l1Provider.getBlockNumber();
+      const currentBlock = await l1Provider.getBlock(blockNumber);
+
+      const currentBlockHash = currentBlock.hash;
+
+      setBlockHashAndNumber({ hash: currentBlockHash, number: blockNumber });
+    })();
+  }, [updateTime]);
+
   const value = {
     name: streamName,
-    // nftGateAddress: nftAddress ?? "",
+    blockHash: blockHashAndNumber.hash ?? "",
     owner: data?.address ?? "",
   };
 
@@ -73,6 +101,20 @@ const CreateStreamDialog = ({
         <AlertDialogTitle asChild>
           <Heading size="1">Sign a new stream key</Heading>
         </AlertDialogTitle>
+
+        <Text css={{ fontWeight: 700, mt: "$2" }}>Current Block</Text>
+        <Text css={{ mt: "$2" }}>
+          Number: <Badge variant="primary">{blockHashAndNumber.number}</Badge>
+        </Text>
+        <Text>
+          Hash:{" "}
+          <Badge variant="primary">
+            {blockHashAndNumber.hash.replace(
+              blockHashAndNumber.hash.slice(5, 60),
+              "…"
+            )}
+          </Badge>
+        </Text>
 
         {signature && streamKey ? (
           <Box>
