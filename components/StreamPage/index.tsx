@@ -12,7 +12,6 @@ import {
   TextField,
 } from "@livepeer/design-system";
 import { CheckCircledIcon } from "@modulz/radix-icons";
-import { block } from "apollo/resolvers/Query";
 import { useEffect, useState } from "react";
 import { Player } from "video-react";
 import { useAccount } from "wagmi";

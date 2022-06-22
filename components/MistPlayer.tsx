@@ -4,7 +4,7 @@ export const MistPlayer = ({ proof }) => {
   useEffect(() => {
     setTimeout(() => {
       var a = function () {
-        window.mistPlay("5208b31slogl2gw4", {
+        (window as any).mistPlay("5208b31slogl2gw4", {
           target: document.getElementById("mistvideo"),
           urlappend: `?proof=${proof}`,
           // forcePlayer: "hlsjs",
@@ -14,7 +14,7 @@ export const MistPlayer = ({ proof }) => {
           // },
         });
       };
-      if (!window.mistplayers) {
+      if (!(window as any).mistplayers) {
         var p = document.createElement("script");
         p.src = "https://playback.livepeer.engineering/player.js";
         document.head.appendChild(p);
