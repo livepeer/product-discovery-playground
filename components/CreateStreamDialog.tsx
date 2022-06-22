@@ -19,22 +19,7 @@ import { useEffect, useState } from "react";
 import { useSignTypedData, useAccount, useProvider } from "wagmi";
 import { CodeBlock } from "./CodeBlock";
 import Spinner from "./Spinner";
-
-// All properties on a domain are optional
-export const DOMAIN = {
-  name: "Livepeer",
-  version: "1.0.0",
-  chainId: 42161,
-};
-
-// The named list of all type definitions
-export const TYPES = {
-  Stream: [
-    { name: "name", type: "string" },
-    { name: "blockHash", type: "string" },
-    { name: "owner", type: "address" },
-  ],
-};
+import { DOMAIN, TYPES } from "../constants/typedData";
 
 const CreateStreamDialog = ({
   isOpen,
