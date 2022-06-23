@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "parcel build --target worker worker/worker.ts"
+    "build-parcel": "parcel build --target worker worker/worker.ts"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
