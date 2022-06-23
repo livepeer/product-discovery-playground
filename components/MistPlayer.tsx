@@ -32,6 +32,8 @@ export const MistPlayer = ({ src }) => {
   return (
     <video
       controls
+      autoPlay={true}
+      muted={true}
       ref={videoRef}
       style={{ width: "100%" }}
     />
