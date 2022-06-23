@@ -49,7 +49,7 @@ const Home = () => {
               },
             }}
           >
-            Stream
+            Generate Stream Key
           </Heading>
 
           <Box

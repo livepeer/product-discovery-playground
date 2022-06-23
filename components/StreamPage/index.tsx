@@ -12,6 +12,8 @@ import {
   TextField,
 } from "@livepeer/design-system";
 import { CheckCircledIcon } from "@modulz/radix-icons";
+import { ethers } from "ethers";
+import { getAddress } from "ethers/lib/utils";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -120,6 +122,7 @@ export const StreamPage = ({
               css={{
                 mb: "$2",
               }}
+              disabled={originalEthAddress}
               defaultValue={originalEthAddress}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -136,10 +139,22 @@ export const StreamPage = ({
 
                   try {
                     if (search.length === 42) {
+                      const address = await getAddress(search);
                       const name = await l1Provider.lookupAddress(search);
 
                       if (name) {
-                        setEthAddress((prev) => ({ ...prev, ensName: name }));
+                        setEthAddress((prev) => ({
+                          ...prev,
+                          address: address,
+                          ensName: name,
+                        }));
+                      } else {
+                        const address = await getAddress(search);
+                        setEthAddress((prev) => ({
+                          ...prev,
+                          address: address,
+                          ensName: "",
+                        }));
                       }
                     } else {
                       const address = await l1Provider.resolveName(search);
@@ -165,12 +180,11 @@ export const StreamPage = ({
             </Button>
 
             {isOpen &&
-              ethAddress &&
               (isLoading ? (
                 <Box css={{ mt: "$4" }}>
                   <Spinner />
                 </Box>
-              ) : error ? (
+              ) : error || (!ethAddress.address && !ethAddress.ensName) ? (
                 <Text css={{ color: "$red11", mt: "$3" }}>
                   {error || "Error with address."}
                 </Text>
