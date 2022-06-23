@@ -1,8 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import FormData from "form-data";
-import formidable, { File, IncomingForm } from "formidable";
-import fs from "fs";
 import fetch from "node-fetch";
 import { SignedVideo } from "./asset/create";
 
@@ -36,9 +34,7 @@ const requestHandler = async (
       signature: body.signature,
     };
 
-    fs.writeFileSync(indexFile, JSON.stringify(signedVideo));
-
-    formData.append("file", fs.createReadStream(indexFile));
+    formData.append("file", JSON.stringify(signedVideo));
 
     const response = await fetch(
       "https://ipfs.infura.io:5001/api/v0/add?pin=true",

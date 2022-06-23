@@ -75,6 +75,7 @@ const Viewer = () => {
 
   const onSubmitFile = async () => {
     setIsUploading(true);
+    setErrorUpload("");
 
     const formData = new FormData();
     formData.append("file", fileUpload);
