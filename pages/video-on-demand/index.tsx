@@ -123,6 +123,8 @@ const Viewer = () => {
         } else {
           setErrorUpload(json.error);
         }
+      } else if (res.status === 413) {
+        setErrorUpload("File too large.");
       } else {
         setErrorUpload("Error uploading, please try again.");
       }
