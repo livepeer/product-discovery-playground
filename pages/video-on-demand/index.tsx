@@ -173,36 +173,42 @@ const Viewer = () => {
               to play back with the Livepeer protocol.
             </Text>
 
-            <Flex css={{ justifyContent: "flex-end", alignItems: "center" }}>
-              <Text size="2" css={{ fontWeight: 700, mt: "$3" }}>
-                Latest Ethereum block
-              </Text>
-            </Flex>
-            <Flex
-              css={{
-                mb: "$4",
-                justifyContent: "flex-end",
-                alignItems: "center",
-              }}
-            >
-              <A
-                target="_blank"
-                rel="noopener noreferrer"
-                href={`https://etherscan.io/block/${blockHashAndNumber.hash}`}
-              >
-                <Flex align="center" css={{ mt: "$1" }}>
-                  <Text css={{ fontWeight: 700 }}>
-                    #{blockHashAndNumber.number}
+            {blockHashAndNumber.hash && (
+              <>
+                <Flex
+                  css={{ justifyContent: "flex-end", alignItems: "center" }}
+                >
+                  <Text size="2" css={{ fontWeight: 700, mt: "$3" }}>
+                    Latest Ethereum block
                   </Text>
-                  <Badge css={{ ml: "$1" }} variant="primary">
-                    {blockHashAndNumber.hash.replace(
-                      blockHashAndNumber.hash.slice(5, 60),
-                      "…"
-                    )}
-                  </Badge>
                 </Flex>
-              </A>
-            </Flex>
+                <Flex
+                  css={{
+                    mb: "$4",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                  }}
+                >
+                  <A
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={`https://etherscan.io/block/${blockHashAndNumber.hash}`}
+                  >
+                    <Flex align="center" css={{ mt: "$1" }}>
+                      <Text css={{ fontWeight: 700 }}>
+                        #{blockHashAndNumber.number}
+                      </Text>
+                      <Badge css={{ ml: "$1" }} variant="primary">
+                        {blockHashAndNumber.hash.replace(
+                          blockHashAndNumber.hash.slice(5, 60),
+                          "…"
+                        )}
+                      </Badge>
+                    </Flex>
+                  </A>
+                </Flex>
+              </>
+            )}
 
             <Flex css={{ justifyContent: "flex-end", alignItems: "center" }}>
               {account?.data?.address && (
