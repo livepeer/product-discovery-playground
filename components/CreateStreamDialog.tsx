@@ -128,6 +128,14 @@ const CreateStreamDialog = ({
             <CodeBlock id="streamkey" css={{}}>
               {streamKey}
             </CodeBlock>
+
+            <Text css={{ mt: "$3", mb: "$4" }}>
+              {`The ingest endpoint should be configured to be:`}
+            </Text>
+
+            <CodeBlock id="streamkey" css={{}}>
+              {"rtmp://ingest.livepeer.name/live"}
+            </CodeBlock>
             <Flex css={{ jc: "flex-end", gap: "$3", mt: "$4" }}>
               <AlertDialogCancel asChild>
                 <Button size="2">Done</Button>

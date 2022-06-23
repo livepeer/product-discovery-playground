@@ -1,4 +1,3 @@
-import { CodeBlock } from "@components/CodeBlock";
 import { MistPlayer } from "@components/MistPlayer";
 import Spinner from "@components/Spinner";
 import { l1Provider } from "@lib/chains";
@@ -12,7 +11,6 @@ import {
   TextField,
 } from "@livepeer/design-system";
 import { CheckCircledIcon } from "@modulz/radix-icons";
-import { ethers } from "ethers";
 import { getAddress } from "ethers/lib/utils";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
@@ -37,6 +35,7 @@ export const StreamPage = ({
   });
 
   const [blockHash, setBlockHash] = useState("");
+  const [blockNumber, setBlockNumber] = useState(15015024);
 
   // const streamParams: SignedStream | null = useMemo(
   //   () =>
@@ -78,6 +77,18 @@ export const StreamPage = ({
       }
     }
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (blockHash) {
+        const block = await l1Provider.getBlock(blockHash);
+
+        if (block?.number) {
+          setBlockNumber(block.number);
+        }
+      }
+    })();
+  }, [blockHash]);
 
   return (
     <>
@@ -195,7 +206,11 @@ export const StreamPage = ({
                     {JSON.stringify(ethAddress, null, 2)}
                   </CodeBlock> */}
                   <Box css={{ position: "relative" }}>
-                    <MistPlayer ethAddress={ethAddress.address} />
+                    <MistPlayer
+                      src={`https://playback.livepeer.name/hls/stream+${String(
+                        ethAddress.address
+                      ).toLowerCase()}/index.m3u8`}
+                    />
                     <Box
                       css={{
                         position: "absolute",
@@ -242,13 +257,7 @@ export const StreamPage = ({
                                 fontWeight: 600,
                               }}
                             >
-                              Block Hash:{" "}
-                              {blockHash
-                                ? blockHash?.replace(
-                                    blockHash?.slice(5, 62),
-                                    "…"
-                                  )
-                                : ""}
+                              Creation Block #: {blockNumber}
                             </Text>
                           )}
                         </Flex>

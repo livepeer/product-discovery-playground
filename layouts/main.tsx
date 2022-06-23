@@ -226,7 +226,7 @@ const Layout = ({ children, title = "Livepeer Product Discovery" }) => {
                               </Button>
                             </Link>
                           </Box>
-                          {/* <Box css={{}}>
+                          <Box css={{}}>
                             <Link passHref href="/video-on-demand">
                               <Button
                                 size="3"
@@ -248,10 +248,37 @@ const Layout = ({ children, title = "Livepeer Product Discovery" }) => {
                                   },
                                 }}
                               >
-                                Video On Demand
+                                Create VOD
                               </Button>
                             </Link>
-                          </Box> */}
+                          </Box>
+                          <Box css={{}}>
+                            <Link passHref href="/video-on-demand/view">
+                              <Button
+                                size="3"
+                                css={{
+                                  ml: "$2",
+                                  bc:
+                                    asPath !== "/video-on-demand" &&
+                                    asPath.includes("/video-on-demand/view")
+                                      ? "hsla(0,100%,100%,.05)"
+                                      : "transparent",
+                                  color: "white",
+                                  "&:hover": {
+                                    bc: "hsla(0,100%,100%,.1)",
+                                  },
+                                  "&:active": {
+                                    bc: "hsla(0,100%,100%,.15)",
+                                  },
+                                  "&:disabled": {
+                                    opacity: 0.5,
+                                  },
+                                }}
+                              >
+                                View VOD
+                              </Button>
+                            </Link>
+                          </Box>
                         </Flex>
 
                         <Flex css={{ ml: "auto" }}>

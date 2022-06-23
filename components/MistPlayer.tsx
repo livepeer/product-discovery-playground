@@ -1,11 +1,8 @@
 import { useEffect, useRef } from "react";
 import Hls from "hls.js";
 
-export const MistPlayer = ({ ethAddress }) => {
+export const MistPlayer = ({ src }) => {
   const videoRef = useRef(null);
-  const src = `https://playback.livepeer.name/hls/stream+${String(
-    ethAddress
-  ).toLowerCase()}/index.m3u8`;
 
   useEffect(() => {
     let hls;

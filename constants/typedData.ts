@@ -12,3 +12,11 @@ export const TYPES = {
     { name: "blockHash", type: "string" },
   ],
 };
+
+// The named list of all type definitions
+export const VOD_TYPES = {
+  Upload: [
+    { name: "ipfsHash", type: "string" },
+    { name: "blockHash", type: "string" },
+  ],
+};
