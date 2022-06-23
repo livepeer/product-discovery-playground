@@ -102,7 +102,7 @@ const CreateStreamDialog = ({
           <Heading size="1">Sign a new stream key</Heading>
         </AlertDialogTitle>
 
-        <Text css={{ mt: "$3" }}>Latest Ethereum Block:</Text>
+        <Text size="2" css={{ mt: "$3" }}>Latest Ethereum block</Text>
         <Link
           target="_blank"
           rel="noopener noreferrer"

@@ -13,7 +13,6 @@ import {
 } from "@livepeer/design-system";
 import { CheckCircledIcon } from "@modulz/radix-icons";
 import { useEffect, useState } from "react";
-import { Player } from "video-react";
 import { useAccount } from "wagmi";
 
 const BLOCK_HASH_KEY = "block-hash-signed";
