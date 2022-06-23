@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 
-export const MistPlayer = ({ proof }) => {
+export const MistPlayer = ({ ethAddress }) => {
   useEffect(() => {
     setTimeout(() => {
       var a = function () {
-        (window as any).mistPlay("5208b31slogl2gw4", {
+        (window as any).mistPlay(ethAddress, {
           target: document.getElementById("mistvideo"),
-          urlappend: `?proof=${proof}`,
+          // urlappend: `?proof=${proof}`,
           // forcePlayer: "hlsjs",
           // forceType: "html5/application/vnd.apple.mpegurl",
           // forcePriority: {
@@ -16,14 +16,14 @@ export const MistPlayer = ({ proof }) => {
       };
       if (!(window as any).mistplayers) {
         var p = document.createElement("script");
-        p.src = "https://playback.livepeer.engineering/player.js";
+        p.src = "https://playback.livepeer.name/player.js";
         document.head.appendChild(p);
         p.onload = a;
       } else {
         a();
       }
     });
-  }, [proof]);
+  }, [ethAddress]);
 
   return <div className="mistvideo" id="mistvideo" />;
 };

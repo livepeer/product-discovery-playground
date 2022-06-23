@@ -195,7 +195,7 @@ export const StreamPage = ({
                     {JSON.stringify(ethAddress, null, 2)}
                   </CodeBlock> */}
                   <Box css={{ position: "relative" }}>
-                    <MistPlayer proof="" />
+                    <MistPlayer ethAddress={ethAddress.address} />
                     <Box
                       css={{
                         position: "absolute",
