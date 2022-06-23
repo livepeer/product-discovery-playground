@@ -1,29 +1,42 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import Hls from "hls.js";
 
 export const MistPlayer = ({ ethAddress }) => {
-  useEffect(() => {
-    setTimeout(() => {
-      var a = function () {
-        (window as any).mistPlay(ethAddress, {
-          target: document.getElementById("mistvideo"),
-          // urlappend: `?proof=${proof}`,
-          // forcePlayer: "hlsjs",
-          // forceType: "html5/application/vnd.apple.mpegurl",
-          // forcePriority: {
-          //   source: [["type", ["html5/application/vnd.apple.mpegurl"]]],
-          // },
-        });
-      };
-      if (!(window as any).mistplayers) {
-        var p = document.createElement("script");
-        p.src = "https://playback.livepeer.name/player.js";
-        document.head.appendChild(p);
-        p.onload = a;
-      } else {
-        a();
-      }
-    });
-  }, [ethAddress]);
+  const videoRef = useRef(null);
+  const src = `https://playback.livepeer.name/hls/stream+${String(
+    ethAddress
+  ).toLowerCase()}/index.m3u8`;
 
-  return <div className="mistvideo" id="mistvideo" />;
+  useEffect(() => {
+    let hls;
+    if (videoRef.current) {
+      const video = videoRef.current;
+
+      if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        // Some browers (safari and ie edge) support HLS natively
+        video.src = src;
+      } else if (Hls.isSupported()) {
+        // This will run in all other modern browsers
+        hls = new Hls();
+        hls.loadSource(src);
+        hls.attachMedia(video);
+      } else {
+        console.error("This is a legacy browser that doesn't support MSE");
+      }
+    }
+
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+    };
+  }, [videoRef, src]);
+
+  return (
+    <video
+      controls
+      ref={videoRef}
+      style={{ width: "100%" }}
+    />
+  );
 };
