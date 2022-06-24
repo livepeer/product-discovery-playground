@@ -5,10 +5,11 @@ import {
   Container,
   Flex,
   Heading,
+  Link,
   Text,
   TextField,
 } from "@livepeer/design-system";
-import { CheckCircledIcon } from "@modulz/radix-icons";
+import { ArrowTopRightIcon, CheckCircledIcon } from "@modulz/radix-icons";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -18,6 +19,7 @@ import { LivepeerApiResponse } from "pages/api/asset/[id]";
 import { ethers } from "ethers";
 import { DOMAIN, VOD_TYPES } from "constants/typedData";
 import { l1Provider } from "@lib/chains";
+import { CodeBlock } from "@components/CodeBlock";
 
 export const VideoOnDemandPage = ({
   originalIpfsHash,
@@ -208,10 +210,18 @@ export const VideoOnDemandPage = ({
               ipfsHash &&
               (ipfsHash.length === 46 || ipfsHash.length === 59) && (
                 <Box css={{ mt: "$4" }}>
-                  {/* <Text css={{ mb: "$3" }}>Stream parameters:</Text>
-                  <CodeBlock id="streamkey" css={{ mb: "$3" }}>
-                    {JSON.stringify(ipfsHash, null, 2)}
-                  </CodeBlock> */}
+                  <Flex css={{ justifyContent: "flex-end" }}>
+                    <Link
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={`https://infura-ipfs.io/ipfs/${ipfsHash}`}
+                    >
+                      <Button variant="primary">
+                        View signature metadata{" "}
+                        <Box as={ArrowTopRightIcon} css={{ ml: "$1" }} />
+                      </Button>
+                    </Link>
+                  </Flex>
                   <Box css={{ mt: "$4" }}>
                     <Box css={{ position: "relative" }}>
                       <MistPlayer src={playbackUrl} />
