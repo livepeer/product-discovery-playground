@@ -1,5 +1,4 @@
 import { getLayout } from "@layouts/main";
-import Hash from "ipfs-only-hash";
 
 import {
   Badge,
@@ -112,15 +111,6 @@ const Viewer = () => {
     })();
   }, [updateTime]);
 
-  const value: SignatureBody = useMemo(
-    () => ({
-      contentID: ipfsHash ?? "",
-      blockHash: blockHashAndNumber.hash ?? "",
-      metadata: formData,
-    }),
-    [ipfsHash, blockHashAndNumber, formData]
-  );
-
   const { signTypedDataAsync } = useSignTypedData();
 
   const onSubmitFile = async () => {
@@ -161,12 +151,10 @@ const Viewer = () => {
     setIsUploading(true);
     setErrorUpload("");
 
-    console.log(signatureTypes);
-
     try {
       const signatureBody: SignatureBody = {
-        contentID: ipfsCreatedHash,
-        creationBlockHash: blockHashAndNumber.hash,
+        contentID: ipfsCreatedHash ? `ipfs://${ipfsCreatedHash}` : "",
+        creationBlockHash: blockHashAndNumber.hash ?? "",
 
         metadata: formData,
       };

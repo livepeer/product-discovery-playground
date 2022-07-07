@@ -14,7 +14,11 @@ import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { MistPlayer } from "@components/MistPlayer";
-import { CreateResponse, SignatureBody } from "pages/api/asset/create";
+import {
+  CreateResponse,
+  SignatureBody,
+  SignaturePayload,
+} from "pages/api/asset/create";
 import { LivepeerApiResponse } from "pages/api/asset/[id]";
 import { ethers } from "ethers";
 import { DOMAIN } from "constants/typedData";
@@ -36,9 +40,7 @@ export const VideoOnDemandPage = ({
 
   const [ipfsHash, setIpfsHash] = useState<string>(originalIpfsHash || "");
 
-  const [signatureBody, setSignatureBody] = useState<SignatureBody | null>(
-    null
-  );
+  const [signedVideo, setSignedVideo] = useState<SignaturePayload | null>(null);
   const [blockNumber, setBlockNumber] = useState(15015024);
 
   const [addressAndEnsName, setAddressAndEnsName] = useState({
@@ -78,7 +80,7 @@ export const VideoOnDemandPage = ({
 
           const signedVideo = json.signedVideo;
 
-          setSignatureBody(json.signedVideo.body);
+          setSignedVideo(json.signedVideo);
 
           const addr = ethers.utils.verifyTypedData(
             DOMAIN,
@@ -147,9 +149,9 @@ export const VideoOnDemandPage = ({
 
   useEffect(() => {
     (async () => {
-      if (signatureBody?.creationBlockHash) {
+      if (signedVideo?.body?.creationBlockHash) {
         const block = await l1Provider.getBlock(
-          signatureBody.creationBlockHash
+          signedVideo?.body.creationBlockHash
         );
 
         if (block?.number) {
@@ -157,7 +159,7 @@ export const VideoOnDemandPage = ({
         }
       }
     })();
-  }, [signatureBody?.creationBlockHash]);
+  }, [signedVideo?.body?.creationBlockHash]);
 
   return (
     <>
@@ -226,9 +228,10 @@ export const VideoOnDemandPage = ({
               </Box>
             ) : (
               playbackUrl &&
+              signedVideo?.body &&
               ipfsHash &&
               (ipfsHash.length === 46 || ipfsHash.length === 59) && (
-                <Box css={{ mt: "$4" }}>
+                <Box css={{ mt: "$2" }}>
                   <Flex css={{ justifyContent: "flex-end" }}>
                     <Link
                       target="_blank"
@@ -241,7 +244,10 @@ export const VideoOnDemandPage = ({
                       </Button>
                     </Link>
                   </Flex>
-                  <Box css={{ mt: "$4" }}>
+                  <CodeBlock id="signatureBody" css={{ mt: "$2" }}>
+                    {JSON.stringify(signedVideo, null, 2)}
+                  </CodeBlock>
+                  <Box css={{ mt: "$2" }}>
                     <Box css={{ position: "relative" }}>
                       <MistPlayer src={playbackUrl} />
                       <Box
@@ -252,7 +258,7 @@ export const VideoOnDemandPage = ({
                         }}
                       >
                         <Box>
-                          {signatureBody?.metadata?.name && (
+                          {signedVideo?.body?.metadata?.name && (
                             <Flex css={{ justifyContent: "flex-start" }}>
                               <Text
                                 size="2"
@@ -261,11 +267,11 @@ export const VideoOnDemandPage = ({
                                   fontWeight: 600,
                                 }}
                               >
-                                {signatureBody?.metadata?.name}
+                                {signedVideo?.body?.metadata?.name}
                               </Text>
                             </Flex>
                           )}
-                          {signatureBody?.metadata?.description && (
+                          {signedVideo?.body?.metadata?.description && (
                             <Flex css={{ justifyContent: "flex-start" }}>
                               <Text
                                 size="1"
@@ -273,7 +279,7 @@ export const VideoOnDemandPage = ({
                                   fontWeight: 400,
                                 }}
                               >
-                                {signatureBody?.metadata?.description}
+                                {signedVideo?.body?.metadata?.description}
                               </Text>
                             </Flex>
                           )}
@@ -317,7 +323,7 @@ export const VideoOnDemandPage = ({
                             <Box as={CheckCircledIcon} />
                           </Flex>
                           <Flex css={{ justifyContent: "flex-end" }}>
-                            {isHover && signatureBody?.creationBlockHash && (
+                            {isHover && signedVideo?.body?.creationBlockHash && (
                               <Text
                                 size="2"
                                 css={{

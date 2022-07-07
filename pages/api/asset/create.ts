@@ -119,7 +119,10 @@ const requestHandler = async (
 
     const metadataJson = (await responseInfura.json()) as SignaturePayload;
 
-    const ipfsUrl = `https://infura-ipfs.io/ipfs/${metadataJson.body.contentID}`;
+    const ipfsUrl = `https://infura-ipfs.io/ipfs/${metadataJson.body.contentID.replace(
+      "ipfs://",
+      ""
+    )}`;
 
     const response = await fetch("https://livepeer.studio/api/asset/import", {
       method: "POST",
