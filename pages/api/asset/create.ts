@@ -2,14 +2,34 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import fetch from "node-fetch";
 
-export type Video = {
-  ipfsHash: string;
-  blockHash: string;
+export type SignatureBody = {
+  /**
+   * Identifier with URL prefix associated with protocol
+   */
+  contentID: string;
+  /**
+   * Block hash on Ethereum when payload was signed
+   */
+  creationBlockHash?: string;
+  /**
+   * Arbitrary metadata defined by the user.
+   */
+  metadata?: { [key: string]: any };
 };
 
-export type SignedVideo = {
-  message: Video;
+export type SignaturePayload = {
+  /**
+   * The signed content
+   */
+  body: SignatureBody;
+  /**
+   * The signature over the message body hash
+   */
   signature: string;
+  /**
+   * EOA which signed the payload
+   */
+  signer: string;
 };
 
 const LIVEPEER_API_KEY = process.env.LIVEPEER_API_KEY ?? null;
@@ -64,7 +84,7 @@ export type CreateResponse = {
   hash?: string;
   url?: string;
   outputAssetId?: string;
-  signedVideo?: SignedVideo;
+  signedVideo?: SignaturePayload;
   error?: string;
 };
 
@@ -97,9 +117,9 @@ const requestHandler = async (
       }
     );
 
-    const metadataJson = (await responseInfura.json()) as SignedVideo;
+    const metadataJson = (await responseInfura.json()) as SignaturePayload;
 
-    const ipfsUrl = `https://infura-ipfs.io/ipfs/${metadataJson.message.ipfsHash}`;
+    const ipfsUrl = `https://infura-ipfs.io/ipfs/${metadataJson.body.contentID}`;
 
     const response = await fetch("https://livepeer.studio/api/asset/import", {
       method: "POST",
@@ -108,7 +128,7 @@ const requestHandler = async (
         authorization: `Bearer ${LIVEPEER_API_KEY}`,
       },
       body: JSON.stringify({
-        name: metadataJson.message.ipfsHash,
+        name: metadataJson.body.contentID,
         url: ipfsUrl,
       }),
     });
@@ -120,7 +140,7 @@ const requestHandler = async (
         hash: ipfsHash ?? "",
         url: ipfsUrl ?? "",
         outputAssetId: json2?.task?.outputAssetId ?? "",
-        signedVideo: metadataJson
+        signedVideo: metadataJson,
       });
     } else {
       console.error(response);

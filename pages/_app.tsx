@@ -15,6 +15,7 @@ import { infuraProvider } from "wagmi/providers/infura";
 import { publicProvider } from "wagmi/providers/public";
 import { useApollo } from "../apollo";
 import "video-react/dist/video-react.css";
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 
 function App({ Component, pageProps }) {
   const client = useApollo(pageProps.initialApolloState);
@@ -68,9 +69,25 @@ function App({ Component, pageProps }) {
             theme={rainbowTheme}
             chains={chains}
           >
-            <CookiesProvider>
-              <IdProvider>{getLayout(<Component {...pageProps} />)}</IdProvider>
-            </CookiesProvider>{" "}
+            <ChakraProvider
+              theme={extendTheme({
+                styles: {
+                  global: {
+                    // styles for the `body`
+                    body: {
+                      bg: "hsl(155 7% 8.4%)",
+                      color: "white",
+                    },
+                  },
+                },
+              })}
+            >
+              <CookiesProvider>
+                <IdProvider>
+                  {getLayout(<Component {...pageProps} />)}
+                </IdProvider>
+              </CookiesProvider>
+            </ChakraProvider>
           </RainbowKitProvider>
         </WagmiConfig>
       </ApolloProvider>
