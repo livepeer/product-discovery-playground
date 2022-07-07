@@ -57,7 +57,6 @@ export const VideoOnDemandPage = ({
     (async () => {
       const result = await fetch(`/json-schemas/1-owner-vod.types.json`);
       const json = await result.json();
-
       setSignatureTypes(json);
     })();
   }, []);
