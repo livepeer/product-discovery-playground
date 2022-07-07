@@ -21,11 +21,11 @@ import Link from "next/link";
 import { l1Provider } from "@lib/chains";
 import { DOMAIN } from "constants/typedData";
 import { SignatureBody, SignaturePayload } from "pages/api/asset/create";
-import { withTheme } from "@rjsf/core";
+import { FormProps, withTheme } from "@rjsf/core";
 import { Theme as ChakraUITheme } from "@rjsf/chakra-ui";
 import { TypedDataField } from "@ethersproject/abstract-signer";
 
-const Form = withTheme(ChakraUITheme);
+const Form = withTheme(ChakraUITheme) as React.FunctionComponent<FormProps<{}>>;
 
 const ajv = new Ajv();
 
