@@ -23,6 +23,7 @@ import { FormProps, withTheme } from "@rjsf/core";
 import { Theme as ChakraUITheme } from "@rjsf/chakra-ui";
 import { TypedDataField } from "@ethersproject/abstract-signer";
 import { SignedVideo, VideoAttributes } from "pages/api/asset/create";
+import { Select } from "@chakra-ui/react";
 
 const Form = withTheme(ChakraUITheme) as React.FunctionComponent<FormProps<{}>>;
 
@@ -45,6 +46,10 @@ const Viewer = () => {
   });
   const [updateTime, setUpdateTime] = useState(-1);
 
+  const [metadataUrl, setMetadataUrl] = useState<
+    "1-owner-vod" | "external-id-vod" | null
+  >(null);
+
   const [jsonSchema, setJsonSchema] = useState<object | null>(null);
   const [signatureTypes, setSignatureTypes] = useState<Record<
     string,
@@ -57,28 +62,35 @@ const Viewer = () => {
   const [formData, setFormData] = useState<object | null>();
 
   useEffect(() => {
-    if (account.data?.address) {
+    if (account.data?.address && metadataUrl === "1-owner-vod") {
       setFormData((prev) => ({ ...prev, ownerAddress: account.data.address }));
     }
-  }, [account.data]);
+    else {
+      setFormData((prev) => ({ ...prev, ownerAddress: undefined }));
+    }
+  }, [account.data, metadataUrl]);
 
   useEffect(() => {
     (async () => {
-      const result = await fetch(`/json-schemas/1-owner-vod.schema.json`);
-      const json = await result.json();
+      if (metadataUrl) {
+        const result = await fetch(`/json-schemas/${metadataUrl}.schema.json`);
+        const json = await result.json();
 
-      setJsonSchema(json);
+        setJsonSchema(json);
+      }
     })();
-  }, []);
+  }, [metadataUrl]);
 
   useEffect(() => {
     (async () => {
-      const result = await fetch(`/json-schemas/1-owner-vod.types.json`);
-      const json = await result.json();
+      if (metadataUrl) {
+        const result = await fetch(`/json-schemas/${metadataUrl}.types.json`);
+        const json = await result.json();
 
-      setSignatureTypes(json);
+        setSignatureTypes(json);
+      }
     })();
-  }, []);
+  }, [metadataUrl]);
 
   useEffect(() => {
     (async () => {
@@ -169,7 +181,7 @@ const Viewer = () => {
           body: signatureBody,
           signer: account.data.address,
           signature: signature,
-          signatureTypes: signatureTypes
+          signatureTypes: signatureTypes,
         };
 
         const valid = ajv.validate(vodSignatureSchema, metadataPayload);
@@ -346,6 +358,22 @@ const Viewer = () => {
               Add Metadata
             </Heading>
 
+            <Select
+              mb={4}
+              disabled={!ipfsCreatedHash}
+              onChange={(e) =>
+                setMetadataUrl(
+                  e.target.value === "1-owner-vod"
+                    ? "1-owner-vod"
+                    : "external-id-vod"
+                )
+              }
+              placeholder="Select metadata schema"
+            >
+              <option value="1-owner-vod">Single Owner VOD</option>
+              <option value="external-id-vod">External ID VOD</option>
+            </Select>
+
             {jsonSchema && (
               <Form
                 disabled={!ipfsCreatedHash}
@@ -360,7 +388,7 @@ const Viewer = () => {
                   css={{ justifyContent: "flex-end", alignItems: "center" }}
                 >
                   <Button
-                    disabled={!fileUpload || isUploading || ipfsHash}
+                    disabled={!fileUpload || isUploading || ipfsHash || !ipfsCreatedHash}
                     variant="primary"
                     size={2}
                     css={{ ml: "$2" }}

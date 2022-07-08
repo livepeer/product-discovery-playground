@@ -228,7 +228,7 @@ export const VideoOnDemandPage = ({
                   <CodeBlock id="signatureBody" css={{ mt: "$2" }}>
                     {JSON.stringify(signedVideo, null, 2)}
                   </CodeBlock>
-                  <Box css={{ mt: "$2" }}>
+                  <Box css={{ mt: "$2", mb: "$8" }}>
                     <Box css={{ position: "relative" }}>
                       <MistPlayer src={playbackUrl} />
                       <Box
@@ -261,6 +261,30 @@ export const VideoOnDemandPage = ({
                                 }}
                               >
                                 {signedVideo?.body?.metadata?.description}
+                              </Text>
+                            </Flex>
+                          )}
+                          {signedVideo?.body?.metadata?.ownerAddress && (
+                            <Flex css={{ justifyContent: "flex-start" }}>
+                              <Text
+                                size="1"
+                                css={{
+                                  fontWeight: 400,
+                                }}
+                              >
+                                {signedVideo?.body?.metadata?.ownerAddress}
+                              </Text>
+                            </Flex>
+                          )}
+                          {signedVideo?.body?.metadata?.externalId && (
+                            <Flex css={{ justifyContent: "flex-start" }}>
+                              <Text
+                                size="1"
+                                css={{
+                                  fontWeight: 400,
+                                }}
+                              >
+                                {signedVideo?.body?.metadata?.externalId}
                               </Text>
                             </Flex>
                           )}

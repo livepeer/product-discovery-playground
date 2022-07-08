@@ -1,0 +1,23 @@
+{
+  "$id": "https://livepeer.name/json-schemas/external-id-vod.schema.json",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string",
+      "description": "The name of the video"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string",
+      "description": "Describes the video contents"
+    },
+    "externalId": {
+      "title": "External Identifier",
+      "type": "string",
+      "description": "External identifier for the VOD"
+    }
+  },
+  "required": ["name", "description", "externalId"]
+}
