@@ -1,5 +1,4 @@
 import ethers from "ethers";
-import fetch from "node-fetch";
 import { DOMAIN } from "../constants/typedData";
 import { TypedDataField } from "@ethersproject/abstract-signer";
 
