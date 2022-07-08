@@ -51,14 +51,23 @@ async function handleRequest(request: Request): Promise<Response> {
     } else {
       return new Response("not found", { status: 404 });
     }
-    const result = await fetch(`https://livepeer.name/json-schemas/stream-signature.types.json`);
-    const signatureTypes = await result.json() as Record<string, TypedDataField[]>;
-    const streamKeyParams = new URLSearchParams(decodeURIComponent(streamKeyEncoded));
+    const result = await fetch(
+      `https://livepeer.name/json-schemas/stream-signature.types.json`
+    );
+    const signatureTypes = (await result.json()) as Record<
+      string,
+      TypedDataField[]
+    >;
+    const streamKeyParams = atob(streamKeyEncoded).split("|");
+
+    if (!streamKeyParams[1]) {
+      throw new Error("Invalid stream key format");
+    }
 
     const signaturePayload = {
-      cid: streamKeyParams.get("cid")
-    }
-    const signature = streamKeyParams.get("sig")
+      cid: streamKeyParams[0],
+    };
+    const signature = streamKeyParams[1];
 
     const addr = ethers.utils
       .verifyTypedData(DOMAIN, signatureTypes, signaturePayload, signature)

@@ -27,6 +27,7 @@ import { Theme as ChakraUITheme } from "@rjsf/chakra-ui";
 import { TypedDataField } from "@ethersproject/abstract-signer";
 import { UploadResponse } from "pages/api/upload-metadata";
 import { IPFS_CONTENT_KEY } from "./StreamPage";
+import { ethers } from "ethers";
 
 const Form = withTheme(ChakraUITheme) as React.FunctionComponent<FormProps<{}>>;
 
@@ -228,11 +229,11 @@ const CreateStreamDialog = ({
 
           // setStreamKey(encodeURIComponent(JSON.stringify(signedStream)));
 
-          const streamKeyParams = new URLSearchParams();
-          streamKeyParams.set("cid", signedStream.body.cid);
-          streamKeyParams.set("sig", signedStream.sig);
-
-          setStreamKey(encodeURIComponent(streamKeyParams.toString()));
+          setStreamKey(
+            Buffer.from(
+              `${signedStream.body.cid}|${signedStream.sig}`
+            ).toString("base64")
+          );
         } else {
           setErrorUpload(json.error);
         }
