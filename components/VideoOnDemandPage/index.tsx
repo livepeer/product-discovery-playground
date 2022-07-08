@@ -14,10 +14,10 @@ import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { MistPlayer } from "@components/MistPlayer";
-import { CreateResponse } from "pages/api/asset/create";
+import { CreateResponse, SignedVideo } from "pages/api/asset/create";
 import { LivepeerApiResponse } from "pages/api/asset/[id]";
 import { ethers } from "ethers";
-import { DOMAIN, VOD_TYPES } from "constants/typedData";
+import { DOMAIN } from "constants/typedData";
 import { l1Provider } from "@lib/chains";
 import { CodeBlock } from "@components/CodeBlock";
 
@@ -35,7 +35,7 @@ export const VideoOnDemandPage = ({
 
   const [ipfsHash, setIpfsHash] = useState<string>(originalIpfsHash || "");
 
-  const [blockHash, setBlockHash] = useState("");
+  const [signedVideo, setSignedVideo] = useState<SignedVideo | null>(null);
   const [blockNumber, setBlockNumber] = useState(15015024);
 
   const [addressAndEnsName, setAddressAndEnsName] = useState({
@@ -61,12 +61,12 @@ export const VideoOnDemandPage = ({
 
           const signedVideo = json.signedVideo;
 
-          setBlockHash(json.signedVideo.message.blockHash);
+          setSignedVideo(json.signedVideo);
 
           const addr = ethers.utils.verifyTypedData(
             DOMAIN,
-            VOD_TYPES,
-            signedVideo.message,
+            signedVideo.signatureTypes,
+            signedVideo.body,
             signedVideo.signature
           );
 
@@ -130,15 +130,17 @@ export const VideoOnDemandPage = ({
 
   useEffect(() => {
     (async () => {
-      if (blockHash) {
-        const block = await l1Provider.getBlock(blockHash);
+      if (signedVideo?.body?.creationBlockHash) {
+        const block = await l1Provider.getBlock(
+          signedVideo?.body.creationBlockHash
+        );
 
         if (block?.number) {
           setBlockNumber(block.number);
         }
       }
     })();
-  }, [blockHash]);
+  }, [signedVideo?.body?.creationBlockHash]);
 
   return (
     <>
@@ -207,9 +209,10 @@ export const VideoOnDemandPage = ({
               </Box>
             ) : (
               playbackUrl &&
+              signedVideo?.body &&
               ipfsHash &&
               (ipfsHash.length === 46 || ipfsHash.length === 59) && (
-                <Box css={{ mt: "$4" }}>
+                <Box css={{ mt: "$2" }}>
                   <Flex css={{ justifyContent: "flex-end" }}>
                     <Link
                       target="_blank"
@@ -222,9 +225,71 @@ export const VideoOnDemandPage = ({
                       </Button>
                     </Link>
                   </Flex>
-                  <Box css={{ mt: "$4" }}>
+                  <CodeBlock id="signatureBody" css={{ mt: "$2" }}>
+                    {JSON.stringify(signedVideo, null, 2)}
+                  </CodeBlock>
+                  <Box css={{ mt: "$2", mb: "$8" }}>
                     <Box css={{ position: "relative" }}>
                       <MistPlayer src={playbackUrl} />
+                      <Box
+                        css={{
+                          position: "absolute",
+                          top: 6,
+                          left: 12,
+                        }}
+                      >
+                        <Box>
+                          {signedVideo?.body?.metadata?.name && (
+                            <Flex css={{ justifyContent: "flex-start" }}>
+                              <Text
+                                size="2"
+                                css={{
+                                  mt: "$1",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {signedVideo?.body?.metadata?.name}
+                              </Text>
+                            </Flex>
+                          )}
+                          {signedVideo?.body?.metadata?.description && (
+                            <Flex css={{ justifyContent: "flex-start" }}>
+                              <Text
+                                size="1"
+                                css={{
+                                  fontWeight: 400,
+                                }}
+                              >
+                                {signedVideo?.body?.metadata?.description}
+                              </Text>
+                            </Flex>
+                          )}
+                          {signedVideo?.body?.metadata?.ownerAddress && (
+                            <Flex css={{ justifyContent: "flex-start" }}>
+                              <Text
+                                size="1"
+                                css={{
+                                  fontWeight: 400,
+                                }}
+                              >
+                                {signedVideo?.body?.metadata?.ownerAddress}
+                              </Text>
+                            </Flex>
+                          )}
+                          {signedVideo?.body?.metadata?.externalId && (
+                            <Flex css={{ justifyContent: "flex-start" }}>
+                              <Text
+                                size="1"
+                                css={{
+                                  fontWeight: 400,
+                                }}
+                              >
+                                {signedVideo?.body?.metadata?.externalId}
+                              </Text>
+                            </Flex>
+                          )}
+                        </Box>
+                      </Box>
                       <Box
                         css={{
                           position: "absolute",
@@ -263,11 +328,10 @@ export const VideoOnDemandPage = ({
                             <Box as={CheckCircledIcon} />
                           </Flex>
                           <Flex css={{ justifyContent: "flex-end" }}>
-                            {isHover && blockHash && (
+                            {isHover && signedVideo?.body?.creationBlockHash && (
                               <Text
                                 size="2"
                                 css={{
-                                  mt: "$1",
                                   fontWeight: 600,
                                 }}
                               >

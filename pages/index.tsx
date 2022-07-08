@@ -11,8 +11,6 @@ import {
 import { useState } from "react";
 import { useAccount } from "wagmi";
 
-const BLOCK_HASH_KEY = "block-hash-signed";
-
 const Home = () => {
   const account = useAccount();
 
@@ -74,11 +72,6 @@ const Home = () => {
           </Box>
 
           <CreateStreamDialog
-            onCreate={async (stream) => {
-              if (window && localStorage) {
-                localStorage.setItem(BLOCK_HASH_KEY, stream.blockHash);
-              }
-            }}
             onOpenChange={(isOpen) => setIsStreamDialogOpen(isOpen)}
             isOpen={isStreamDialogOpen}
           />

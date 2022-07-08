@@ -19,37 +19,137 @@ import { useEffect, useMemo, useState } from "react";
 import { useSignTypedData, useAccount, useProvider } from "wagmi";
 import { CodeBlock } from "./CodeBlock";
 import Spinner from "./Spinner";
-import { DOMAIN, TYPES } from "../constants/typedData";
+import { DOMAIN } from "../constants/typedData";
 
-export type Stream = {
-  name: string;
-  blockHash: string;
-};
+import Ajv from "ajv";
+import { FormProps, withTheme } from "@rjsf/core";
+import { Theme as ChakraUITheme } from "@rjsf/chakra-ui";
+import { TypedDataField } from "@ethersproject/abstract-signer";
+import { UploadResponse } from "pages/api/upload-metadata";
+import { IPFS_CONTENT_KEY } from "./StreamPage";
+
+const Form = withTheme(ChakraUITheme) as React.FunctionComponent<FormProps<{}>>;
+
+const ajv = new Ajv();
 
 export type SignedStream = {
-  message: Stream;
-  signature: string;
+  /**
+   * The signed content
+   */
+  body: StreamAttributes;
+  /**
+   * The signature over the content ID hash
+   */
+  sig: string;
+};
+
+/**
+ * The signed content
+ */
+export type StreamAttributes = {
+  /**
+   * Identifier with URL prefix associated with protocol
+   */
+  cid: string;
+};
+
+/**
+ * The stored signed content
+ */
+export type StreamStoredAttributes = {
+  /**
+   * Block hash on Ethereum L1 when payload was signed
+   */
+  creationBlockHash: string;
+  /**
+   * Describes the video contents
+   */
+  description: string;
+  /**
+   * The name of the video
+   */
+  name: string;
+  /**
+   * EOA or contract address for the owner(s)
+   */
+  ownerAddress: string;
 };
 
 const CreateStreamDialog = ({
   isOpen,
   onOpenChange,
-  onCreate,
 }: {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onCreate: (stream: Stream) => Promise<void>;
 }) => {
-  const [creating, setCreating] = useState(false);
-  const [streamName, setStreamName] = useState("");
-  const [signature, setSignature] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [errorUpload, setErrorUpload] = useState("");
+  const [streamKey, setStreamKey] = useState("");
   const [blockHashAndNumber, setBlockHashAndNumber] = useState({
     hash: "",
     number: -1,
   });
   const [updateTime, setUpdateTime] = useState(-1);
 
-  const { data } = useAccount();
+  const account = useAccount();
+
+  const [signatureTypes, setSignatureTypes] = useState<Record<
+    string,
+    TypedDataField[]
+  > | null>(null);
+
+  const [jsonSchema, setJsonSchema] = useState<object | null>(null);
+  const [streamSignatureSchema, setStreamSignatureSchema] = useState<
+    object | null
+  >(null);
+  const [formData, setFormData] = useState<{
+    name?: string;
+    description?: string;
+    ownerAddress?: string;
+    creationBlockHash?: string;
+  } | null>();
+
+  useEffect(() => {
+    if (account.data?.address) {
+      setFormData((prev) => ({ ...prev, ownerAddress: account.data.address }));
+    }
+  }, [account.data]);
+
+  useEffect(() => {
+    if (blockHashAndNumber.hash) {
+      setFormData((prev) => ({
+        ...prev,
+        creationBlockHash: blockHashAndNumber.hash,
+      }));
+    }
+  }, [blockHashAndNumber.hash]);
+
+  useEffect(() => {
+    (async () => {
+      const result = await fetch(`/json-schemas/1-owner-stream.schema.json`);
+      const json = await result.json();
+
+      setJsonSchema(json);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const result = await fetch(`/json-schemas/stream-signature.types.json`);
+      const json = await result.json();
+
+      setSignatureTypes(json);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const result = await fetch(`/json-schemas/stream-signature.schema.json`);
+      const json = await result.json();
+
+      setStreamSignatureSchema(json);
+    })();
+  }, []);
 
   useEffect(() => {
     setUpdateTime(Date.now());
@@ -72,28 +172,75 @@ const CreateStreamDialog = ({
     })();
   }, [updateTime]);
 
-  const value: Stream = useMemo(
-    () => ({
-      name: streamName,
-      blockHash: blockHashAndNumber.hash ?? "",
-    }),
-    [streamName, blockHashAndNumber]
-  );
+  const { signTypedDataAsync } = useSignTypedData();
 
-  const { signTypedDataAsync, variables } = useSignTypedData({
-    domain: DOMAIN,
-    types: TYPES,
-    value,
-  });
+  const onSubmitMetadata = async () => {
+    if (isGenerating || !account.data?.address) {
+      return;
+    }
+    setErrorUpload("");
+    setIsGenerating(true);
 
-  const signedStream: SignedStream = useMemo(
-    () => ({ message: value, signature: signature }),
-    [value, signature]
-  );
+    try {
+      const storedAttributes: StreamStoredAttributes = {
+        creationBlockHash: formData.creationBlockHash,
 
-  const streamKey = variables
-    ? Buffer.from(JSON.stringify(signedStream)).toString("base64")
-    : undefined;
+        name: formData.name,
+        description: formData.description,
+        ownerAddress: formData.ownerAddress,
+      };
+
+      const res = await fetch("/api/upload-metadata", {
+        method: "POST",
+        body: JSON.stringify(storedAttributes),
+      });
+
+      if (res.status === 200) {
+        const json: UploadResponse = await res.json();
+
+        if (json.hash) {
+          const streamAttributes: StreamAttributes = {
+            cid: `ipfs://${json.hash}`,
+          };
+
+          const signature = await signTypedDataAsync({
+            domain: DOMAIN,
+            types: signatureTypes,
+            value: streamAttributes,
+          });
+
+          const signedStream: SignedStream = {
+            body: streamAttributes,
+            sig: signature,
+          };
+
+          const valid = ajv.validate(streamSignatureSchema, signedStream);
+          if (!valid) {
+            throw new Error("Invalid signed stream payload");
+          }
+
+          if (window && localStorage) {
+            localStorage.setItem(
+              IPFS_CONTENT_KEY,
+              JSON.stringify(storedAttributes)
+            );
+          }
+
+          setStreamKey(encodeURIComponent(JSON.stringify(signedStream)));
+
+          // setStreamKey(Buffer.from(JSON.stringify(signedStream)).toString("base64"));
+        } else {
+          setErrorUpload(json.error);
+        }
+      } else {
+        setErrorUpload("Error uploading, please try again.");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
@@ -102,24 +249,13 @@ const CreateStreamDialog = ({
           <Heading size="1">Sign a new stream key</Heading>
         </AlertDialogTitle>
 
-        <Text size="2" css={{ mt: "$3" }}>Latest Ethereum block</Text>
-        <Link
-          target="_blank"
-          rel="noopener noreferrer"
-          href={`https://etherscan.io/block/${blockHashAndNumber.hash}`}
-        >
-          <Flex align="center" css={{ mt: "$1" }}>
-            <Text css={{ fontWeight: 700 }}>#{blockHashAndNumber.number}</Text>
-            <Badge css={{ ml: "$1" }} variant="primary">
-              {blockHashAndNumber.hash.replace(
-                blockHashAndNumber.hash.slice(5, 60),
-                "…"
-              )}
-            </Badge>
-          </Flex>
-        </Link>
+        {errorUpload && (
+          <Text css={{ color: "$red11", mt: "$3" }}>
+            {errorUpload || "Error with address."}
+          </Text>
+        )}
 
-        {signature && streamKey ? (
+        {streamKey ? (
           <Box>
             <Text css={{ mt: "$3", mb: "$4" }}>
               {`Stream key created! Please copy your ${streamKey.length} character base64-encoded stream key and store it in a safe place.`}
@@ -148,36 +284,8 @@ const CreateStreamDialog = ({
             as="form"
             onSubmit={async (e) => {
               e.preventDefault();
-              if (creating) {
-                return;
-              }
-              setCreating(true);
-              try {
-                const signature = await signTypedDataAsync();
-
-                setSignature(signature);
-
-                onCreate(value);
-              } catch (error) {
-                console.error(error);
-              } finally {
-                setCreating(false);
-              }
             }}
           >
-            <Flex direction="column" gap="2">
-              <Label htmlFor="firstName">Stream name</Label>
-              <TextField
-                required
-                size="2"
-                type="text"
-                id="firstName"
-                autoFocus={true}
-                value={streamName}
-                onChange={(e) => setStreamName(e.target.value)}
-                placeholder="DayDAO Monday Hangouts"
-              />
-            </Flex>
             <AlertDialogDescription asChild>
               <Text
                 size="3"
@@ -189,32 +297,71 @@ const CreateStreamDialog = ({
                 proof-of-age.
               </Text>
             </AlertDialogDescription>
-
-            <Flex css={{ jc: "flex-end", gap: "$3", mt: "$4" }}>
-              <AlertDialogCancel asChild>
-                <Button disabled={creating} size="2" ghost>
-                  Cancel
-                </Button>
-              </AlertDialogCancel>
-              <Button
-                css={{ display: "flex", ai: "center" }}
-                type="submit"
-                size="2"
-                disabled={creating || !streamName}
-                variant="primary"
-              >
-                {creating && (
-                  <Spinner
-                    css={{
-                      color: "$hiContrast",
-                      width: 16,
-                      height: 16,
-                      mr: "$2",
-                    }}
-                  />
-                )}
-                Sign stream key
-              </Button>
+            <Text size="2" css={{ mt: "$2" }}>
+              Latest Ethereum block
+            </Text>
+            <Link
+              target="_blank"
+              rel="noopener noreferrer"
+              href={`https://etherscan.io/block/${blockHashAndNumber.hash}`}
+            >
+              <Flex align="center" css={{ mb: "$3" }}>
+                <Text css={{ fontWeight: 700 }}>
+                  #{blockHashAndNumber.number}
+                </Text>
+                <Badge css={{ ml: "$1" }} variant="primary">
+                  {blockHashAndNumber.hash.replace(
+                    blockHashAndNumber.hash.slice(5, 60),
+                    "…"
+                  )}
+                </Badge>
+              </Flex>
+            </Link>
+            <Flex direction="column">
+              {jsonSchema && (
+                <Form
+                  // disabled={!ipfsCreatedHash}
+                  schema={jsonSchema}
+                  formData={formData}
+                  onChange={(e, es) => {
+                    setFormData(e.formData);
+                  }}
+                  uiSchema={{
+                    // hide creation block hash since this is auto-populated
+                    creationBlockHash: { "ui:widget": "hidden" },
+                  }}
+                  onSubmit={onSubmitMetadata}
+                >
+                  <Flex
+                    css={{ justifyContent: "flex-end", alignItems: "center" }}
+                  >
+                    <AlertDialogCancel asChild>
+                      <Button disabled={isGenerating} size="2" ghost>
+                        Cancel
+                      </Button>
+                    </AlertDialogCancel>
+                    <Button
+                      disabled={isGenerating}
+                      variant="primary"
+                      size={2}
+                      css={{ ml: "$2" }}
+                      onClick={onSubmitMetadata}
+                    >
+                      {isGenerating && (
+                        <Spinner
+                          css={{
+                            color: "$hiContrast",
+                            width: 16,
+                            height: 16,
+                            mr: "$2",
+                          }}
+                        />
+                      )}
+                      Create & Sign Stream Key
+                    </Button>
+                  </Flex>
+                </Form>
+              )}
             </Flex>
           </Box>
         )}

@@ -1,0 +1,44 @@
+{
+  "$id": "https://livepeer.name/json-schemas/vod-signature.schema.json",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "body": {
+      "type": "object",
+      "description": "The signed content",
+      "required": ["contentID", "creationBlockHash"],
+      "properties": {
+        "contentID": {
+          "title": "Content ID",
+          "type": "string",
+          "description": "Identifier with URL prefix associated with protocol"
+        },
+        "creationBlockHash": {
+          "title": "Creation Block Hash",
+          "type": "string",
+          "description": "Block hash on Ethereum L1 when payload was signed"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Arbitrary metadata defined by the user."
+        }
+      }
+    },
+    "signature": {
+      "title": "Signature",
+      "type": "string",
+      "description": "The signature over the message body hash"
+    },
+    "signer": {
+      "title": "Signer Address",
+      "type": "string",
+      "description": "EOA which signed the payload"
+    },
+    "signatureTypes": {
+      "title": "Signature Types",
+      "type": "object",
+      "description": "EIP-712 types for the signed payload"
+    }
+  },
+  "required": ["body", "signature", "signer", "signatureTypes"]
+}

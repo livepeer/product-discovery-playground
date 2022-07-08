@@ -1,3 +1,4 @@
+import { StreamStoredAttributes } from "@components/CreateStreamDialog";
 import { MistPlayer } from "@components/MistPlayer";
 import Spinner from "@components/Spinner";
 import { l1Provider } from "@lib/chains";
@@ -15,7 +16,7 @@ import { getAddress } from "ethers/lib/utils";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
-const BLOCK_HASH_KEY = "block-hash-signed";
+export const IPFS_CONTENT_KEY = "ipfs-content";
 
 export const StreamPage = ({
   originalEthAddress,
@@ -34,7 +35,8 @@ export const StreamPage = ({
     ensName: "",
   });
 
-  const [blockHash, setBlockHash] = useState("");
+  const [storedAttributes, setStoredAttributes] =
+    useState<StreamStoredAttributes | null>(null);
   const [blockNumber, setBlockNumber] = useState(15015024);
 
   // const streamParams: SignedStream | null = useMemo(
@@ -66,29 +68,34 @@ export const StreamPage = ({
 
   useEffect(() => {
     if (window && localStorage) {
-      const blockHashLocal = localStorage.getItem(BLOCK_HASH_KEY);
+      const blockHashLocal = localStorage.getItem(IPFS_CONTENT_KEY);
 
       if (blockHashLocal) {
-        setBlockHash(blockHashLocal);
-      } else {
-        setBlockHash(
-          "0x5dd148da1733a676f31577bfe815032b7e6c44ee9a77fd10d61cf5980e76523a"
-        );
+        return setStoredAttributes(JSON.parse(blockHashLocal));
       }
     }
-  }, []);
+    setStoredAttributes({
+      name: "Awesome Stream",
+      description: "An incredible stream",
+      ownerAddress: search,
+      creationBlockHash:
+        "0x5dd148da1733a676f31577bfe815032b7e6c44ee9a77fd10d61cf5980e76523a",
+    });
+  }, [search]);
 
   useEffect(() => {
     (async () => {
-      if (blockHash) {
-        const block = await l1Provider.getBlock(blockHash);
+      if (storedAttributes) {
+        const block = await l1Provider.getBlock(
+          storedAttributes.creationBlockHash
+        );
 
         if (block?.number) {
           setBlockNumber(block.number);
         }
       }
     })();
-  }, [blockHash]);
+  }, [storedAttributes]);
 
   return (
     <>
@@ -214,6 +221,41 @@ export const StreamPage = ({
                     <Box
                       css={{
                         position: "absolute",
+                        top: 6,
+                        left: 12,
+                      }}
+                    >
+                      <Box>
+                        {storedAttributes?.name && (
+                          <Flex css={{ justifyContent: "flex-start" }}>
+                            <Text
+                              size="2"
+                              css={{
+                                mt: "$1",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {storedAttributes?.name}
+                            </Text>
+                          </Flex>
+                        )}
+                        {storedAttributes?.description && (
+                          <Flex css={{ justifyContent: "flex-start" }}>
+                            <Text
+                              size="1"
+                              css={{
+                                fontWeight: 400,
+                              }}
+                            >
+                              {storedAttributes?.description}
+                            </Text>
+                          </Flex>
+                        )}
+                      </Box>
+                    </Box>
+                    <Box
+                      css={{
+                        position: "absolute",
                         top: 10,
                         right: 12,
                       }}
@@ -249,11 +291,10 @@ export const StreamPage = ({
                           <Box as={CheckCircledIcon} />
                         </Flex>
                         <Flex css={{ justifyContent: "flex-end" }}>
-                          {isHover && blockHash && (
+                          {isHover && blockNumber && (
                             <Text
                               size="2"
                               css={{
-                                mt: "$1",
                                 fontWeight: 600,
                               }}
                             >

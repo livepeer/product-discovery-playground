@@ -1,0 +1,28 @@
+{
+  "$id": "https://livepeer.name/json-schemas/1-owner-stream.schema.json",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string",
+      "description": "The name of the video"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string",
+      "description": "Describes the video contents"
+    },
+    "ownerAddress": {
+      "title": "Owner Address",
+      "type": "string",
+      "description": "EOA or contract address for the owner(s)"
+    },
+    "creationBlockHash": {
+      "title": "Creation Block Hash",
+      "type": "string",
+      "description": "Block hash on Ethereum L1 when payload was signed"
+    }
+  },
+  "required": ["name", "description", "ownerAddress", "creationBlockHash"]
+}
