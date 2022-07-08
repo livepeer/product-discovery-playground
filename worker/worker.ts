@@ -53,9 +53,15 @@ async function handleRequest(request: Request): Promise<Response> {
     }
     const result = await fetch(`https://livepeer.name/json-schemas/stream-signature.types.json`);
     const signatureTypes = await result.json() as Record<string, TypedDataField[]>;
-    const data = JSON.parse(decodeURIComponent(streamKeyEncoded));
+    const streamKeyParams = new URLSearchParams(decodeURIComponent(streamKeyEncoded));
+
+    const signaturePayload = {
+      cid: streamKeyParams.get("cid")
+    }
+    const signature = streamKeyParams.get("sig")
+
     const addr = ethers.utils
-      .verifyTypedData(DOMAIN, signatureTypes, data.body, data.sig)
+      .verifyTypedData(DOMAIN, signatureTypes, signaturePayload, signature)
       .toLowerCase();
     return new Response(`${STREAM_PREFIX}+${addr}`);
   } catch (e: any) {

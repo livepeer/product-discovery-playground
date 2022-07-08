@@ -12,8 +12,9 @@ import {
   TextField,
 } from "@livepeer/design-system";
 import { CheckCircledIcon } from "@modulz/radix-icons";
-import { getAddress } from "ethers/lib/utils";
-import { useEffect, useState } from "react";
+import { DOMAIN } from "constants/typedData";
+import { getAddress, verifyTypedData } from "ethers/lib/utils";
+import { useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
 export const IPFS_CONTENT_KEY = "ipfs-content";
@@ -47,19 +48,6 @@ export const StreamPage = ({
   //         ) as SignedStream)
   //       : null,
   //   [streamKey]
-  // );
-
-  // const recoveredAddress = useMemo(
-  //   () =>
-  //     streamParams?.message && streamParams?.signature
-  //       ? verifyTypedData(
-  //           DOMAIN,
-  //           TYPES,
-  //           streamParams?.message,
-  //           streamParams?.signature
-  //         )
-  //       : null,
-  //   [streamParams]
   // );
 
   useEffect(() => {

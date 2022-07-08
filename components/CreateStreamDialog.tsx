@@ -226,9 +226,13 @@ const CreateStreamDialog = ({
             );
           }
 
-          setStreamKey(encodeURIComponent(JSON.stringify(signedStream)));
+          // setStreamKey(encodeURIComponent(JSON.stringify(signedStream)));
 
-          // setStreamKey(Buffer.from(JSON.stringify(signedStream)).toString("base64"));
+          const streamKeyParams = new URLSearchParams();
+          streamKeyParams.set("cid", signedStream.body.cid);
+          streamKeyParams.set("sig", signedStream.sig);
+
+          setStreamKey(encodeURIComponent(streamKeyParams.toString()));
         } else {
           setErrorUpload(json.error);
         }
@@ -258,7 +262,7 @@ const CreateStreamDialog = ({
         {streamKey ? (
           <Box>
             <Text css={{ mt: "$3", mb: "$4" }}>
-              {`Stream key created! Please copy your ${streamKey.length} character base64-encoded stream key and store it in a safe place.`}
+              {`Stream key created! Please copy your ${streamKey.length} character key and paste it into OBS, or store it in a safe place.`}
             </Text>
 
             <CodeBlock id="streamkey" css={{}}>
