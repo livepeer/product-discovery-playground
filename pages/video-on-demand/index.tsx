@@ -19,10 +19,10 @@ import { UploadResponse } from "pages/api/upload-metadata";
 import Link from "next/link";
 import { l1Provider } from "@lib/chains";
 import { DOMAIN } from "constants/typedData";
-import { SignatureBody, SignaturePayload } from "pages/api/asset/create";
 import { FormProps, withTheme } from "@rjsf/core";
 import { Theme as ChakraUITheme } from "@rjsf/chakra-ui";
 import { TypedDataField } from "@ethersproject/abstract-signer";
+import { SignedVideo, VideoAttributes } from "pages/api/asset/create";
 
 const Form = withTheme(ChakraUITheme) as React.FunctionComponent<FormProps<{}>>;
 
@@ -38,7 +38,6 @@ const Viewer = () => {
   const [fileUpload, setFileUpload] = useState<File | null>(null);
   const [ipfsHash, setIpfsHash] = useState<string>("");
 
-  const [signature, setSignature] = useState("");
   const [ipfsCreatedHash, setIpfsCreatedHash] = useState("");
   const [blockHashAndNumber, setBlockHashAndNumber] = useState({
     hash: "",
@@ -152,7 +151,7 @@ const Viewer = () => {
     setErrorUpload("");
 
     try {
-      const signatureBody: SignatureBody = {
+      const signatureBody: VideoAttributes = {
         contentID: ipfsCreatedHash ? `ipfs://${ipfsCreatedHash}` : "",
         creationBlockHash: blockHashAndNumber.hash ?? "",
 
@@ -166,10 +165,11 @@ const Viewer = () => {
       });
 
       try {
-        const metadataPayload: SignaturePayload = {
+        const metadataPayload: SignedVideo = {
           body: signatureBody,
           signer: account.data.address,
           signature: signature,
+          signatureTypes: signatureTypes
         };
 
         const valid = ajv.validate(vodSignatureSchema, metadataPayload);

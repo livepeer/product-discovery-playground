@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import fetch from "node-fetch";
 
-export type SignatureBody = {
+export type VideoAttributes = {
   /**
    * Identifier with URL prefix associated with protocol
    */
@@ -17,11 +17,11 @@ export type SignatureBody = {
   metadata?: { [key: string]: any };
 };
 
-export type SignaturePayload = {
+export type SignedVideo = {
   /**
    * The signed content
    */
-  body: SignatureBody;
+  body: VideoAttributes;
   /**
    * The signature over the message body hash
    */
@@ -30,6 +30,10 @@ export type SignaturePayload = {
    * EOA which signed the payload
    */
   signer: string;
+  /**
+   * EIP-712 types for the signed payload
+   */
+  signatureTypes: { [key: string]: any };
 };
 
 const LIVEPEER_API_KEY = process.env.LIVEPEER_API_KEY ?? null;
@@ -84,7 +88,7 @@ export type CreateResponse = {
   hash?: string;
   url?: string;
   outputAssetId?: string;
-  signedVideo?: SignaturePayload;
+  signedVideo?: SignedVideo;
   error?: string;
 };
 
@@ -117,7 +121,7 @@ const requestHandler = async (
       }
     );
 
-    const metadataJson = (await responseInfura.json()) as SignaturePayload;
+    const metadataJson = (await responseInfura.json()) as SignedVideo;
 
     const ipfsUrl = `https://infura-ipfs.io/ipfs/${metadataJson.body.contentID.replace(
       "ipfs://",

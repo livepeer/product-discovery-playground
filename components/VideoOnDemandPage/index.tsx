@@ -14,17 +14,12 @@ import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { MistPlayer } from "@components/MistPlayer";
-import {
-  CreateResponse,
-  SignatureBody,
-  SignaturePayload,
-} from "pages/api/asset/create";
+import { CreateResponse, SignedVideo } from "pages/api/asset/create";
 import { LivepeerApiResponse } from "pages/api/asset/[id]";
 import { ethers } from "ethers";
 import { DOMAIN } from "constants/typedData";
 import { l1Provider } from "@lib/chains";
 import { CodeBlock } from "@components/CodeBlock";
-import { TypedDataField } from "@ethersproject/abstract-signer";
 
 export const VideoOnDemandPage = ({
   originalIpfsHash,
@@ -40,26 +35,13 @@ export const VideoOnDemandPage = ({
 
   const [ipfsHash, setIpfsHash] = useState<string>(originalIpfsHash || "");
 
-  const [signedVideo, setSignedVideo] = useState<SignaturePayload | null>(null);
+  const [signedVideo, setSignedVideo] = useState<SignedVideo | null>(null);
   const [blockNumber, setBlockNumber] = useState(15015024);
 
   const [addressAndEnsName, setAddressAndEnsName] = useState({
     address: "",
     ens: "",
   });
-
-  const [signatureTypes, setSignatureTypes] = useState<Record<
-    string,
-    TypedDataField[]
-  > | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const result = await fetch(`/json-schemas/1-owner-vod.types.json`);
-      const json = await result.json();
-      setSignatureTypes(json);
-    })();
-  }, []);
 
   const onSubmitIpfs = async (hash: string) => {
     setIsImporting(true);
@@ -83,7 +65,7 @@ export const VideoOnDemandPage = ({
 
           const addr = ethers.utils.verifyTypedData(
             DOMAIN,
-            signatureTypes,
+            signedVideo.signatureTypes,
             signedVideo.body,
             signedVideo.signature
           );

@@ -2,7 +2,6 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import FormData from "form-data";
 import fetch from "node-fetch";
-import { SignaturePayload } from "./asset/create";
 
 type IPFSUploadResponse = {
   Hash: string;
@@ -24,11 +23,7 @@ const requestHandler = async (
 
     const formData = new FormData();
 
-    const indexFile = "./index.json";
-
-    const payload: SignaturePayload = body;
-
-    formData.append("file", JSON.stringify(payload));
+    formData.append("file", JSON.stringify(body));
 
     const response = await fetch(
       "https://ipfs.infura.io:5001/api/v0/add?pin=true",

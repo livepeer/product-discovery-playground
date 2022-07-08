@@ -1,5 +1,7 @@
 import ethers from "ethers";
-import { DOMAIN, TYPES } from "../constants/typedData";
+import fetch from "node-fetch";
+import { DOMAIN } from "../constants/typedData";
+import { TypedDataField } from "@ethersproject/abstract-signer";
 
 const PATHNAME_PREFIX = "/live/";
 const STREAM_PREFIX = "stream";
@@ -38,21 +40,23 @@ async function handleRequest(request: Request): Promise<Response> {
     }
     const { pathname } = new URL(request.url);
     const text = await request.text();
-    let b64;
+    let streamKeyEncoded;
     if (pathname === "/hooks/PUSH_REWRITE") {
-      b64 = handlePushRewrite(text);
+      streamKeyEncoded = handlePushRewrite(text);
     } else if (pathname === "/hooks/DEFAULT_STREAM") {
       // TODO: .eth and .lens lookups can go in here!
       const streamName = handleDefaultStream(text);
       return new Response(streamName);
     } else if (pathname === "/") {
-      b64 = text;
+      streamKeyEncoded = text;
     } else {
       return new Response("not found", { status: 404 });
     }
-    const data = JSON.parse(atob(b64));
+    const result = await fetch(`https://livepeer.name/json-schemas/stream-signature.types.json`);
+    const signatureTypes = await result.json() as Record<string, TypedDataField[]>;
+    const data = JSON.parse(decodeURIComponent(streamKeyEncoded));
     const addr = ethers.utils
-      .verifyTypedData(DOMAIN, TYPES, data.message, data.signature)
+      .verifyTypedData(DOMAIN, signatureTypes, data.body, data.sig)
       .toLowerCase();
     return new Response(`${STREAM_PREFIX}+${addr}`);
   } catch (e: any) {

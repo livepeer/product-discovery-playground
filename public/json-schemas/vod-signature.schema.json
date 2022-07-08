@@ -6,7 +6,7 @@
     "body": {
       "type": "object",
       "description": "The signed content",
-      "required": ["contentID"],
+      "required": ["contentID", "creationBlockHash"],
       "properties": {
         "contentID": {
           "title": "Content ID",
@@ -16,7 +16,7 @@
         "creationBlockHash": {
           "title": "Creation Block Hash",
           "type": "string",
-          "description": "Block hash on Ethereum when payload was signed"
+          "description": "Block hash on Ethereum L1 when payload was signed"
         },
         "metadata": {
           "type": "object",
@@ -33,7 +33,12 @@
       "title": "Signer Address",
       "type": "string",
       "description": "EOA which signed the payload"
+    },
+    "signatureTypes": {
+      "title": "Signature Types",
+      "type": "object",
+      "description": "EIP-712 types for the signed payload"
     }
   },
-  "required": ["body", "signature", "signer"]
+  "required": ["body", "signature", "signer", "signatureTypes"]
 }
