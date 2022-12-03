@@ -175,7 +175,8 @@ const CreateStreamDialog = ({
 
   const { signTypedDataAsync } = useSignTypedData();
 
-  const onSubmitMetadata = async () => {
+  const onSubmitMetadata = async (e) => {
+    e.preventDefault();
     if (isGenerating || !account.data?.address) {
       return;
     }

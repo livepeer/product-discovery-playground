@@ -109,6 +109,12 @@ const requestHandler = async (
   if (req.method === "POST") {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const ipfsHash = body.hash;
+    const INFURA_IPFS_ID = process.env.INFURA_IPFS_ID;
+    const INFURA_IPFS_SECRET = process.env.INFURA_IPFS_SECRET;
+
+    if (!INFURA_IPFS_ID || !INFURA_IPFS_SECRET) {
+      throw new Error("Missing INFURA_IPFS_ID and INFURA_IPFS_SECRET");
+    }
 
     if (!ipfsHash) {
       return res.status(500).json({ error: `Bad IPFS hash.` });
@@ -118,6 +124,10 @@ const requestHandler = async (
       `https://ipfs.infura.io:5001/api/v0/cat?arg=${ipfsHash}`,
       {
         method: "POST",
+        headers: {
+          Authorization:
+            "Basic " + btoa(INFURA_IPFS_ID + ":" + INFURA_IPFS_SECRET),
+        },
       }
     );
 
