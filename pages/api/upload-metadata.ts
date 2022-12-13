@@ -21,6 +21,13 @@ const requestHandler = async (
   if (req.method === "POST") {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
+    const INFURA_IPFS_ID = process.env.INFURA_IPFS_ID;
+    const INFURA_IPFS_SECRET = process.env.INFURA_IPFS_SECRET;
+
+    if (!INFURA_IPFS_ID || !INFURA_IPFS_SECRET) {
+      throw new Error("Missing INFURA_IPFS_ID and INFURA_IPFS_SECRET");
+    }
+
     const formData = new FormData();
 
     formData.append("file", JSON.stringify(body));
@@ -30,6 +37,10 @@ const requestHandler = async (
       {
         method: "POST",
         body: formData,
+        headers: {
+          Authorization:
+            "Basic " + btoa(INFURA_IPFS_ID + ":" + INFURA_IPFS_SECRET),
+        },
       }
     );
 
