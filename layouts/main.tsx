@@ -197,43 +197,18 @@ const Layout = ({ children, title = "Livepeer Product Discovery" }) => {
                                   },
                                 }}
                               >
-                                Create Stream Key
+                                Ethereum Verifiable Video
                               </Button>
                             </Link>
                           </Box>
                           <Box css={{}}>
-                            <Link passHref href="/stream">
-                              <Button
-                                size="3"
-                                css={{
-                                  ml: "$2",
-                                  bc: asPath.includes("/stream")
-                                    ? "hsla(0,100%,100%,.05)"
-                                    : "transparent",
-                                  color: "white",
-                                  "&:hover": {
-                                    bc: "hsla(0,100%,100%,.1)",
-                                  },
-                                  "&:active": {
-                                    bc: "hsla(0,100%,100%,.15)",
-                                  },
-                                  "&:disabled": {
-                                    opacity: 0.5,
-                                  },
-                                }}
-                              >
-                                View Stream
-                              </Button>
-                            </Link>
-                          </Box>
-                          <Box css={{}}>
-                            <Link passHref href="/video-on-demand">
+                            <Link passHref href="/flow">
                               <Button
                                 size="3"
                                 css={{
                                   ml: "$2",
                                   bc:
-                                    asPath === "/video-on-demand"
+                                    asPath === "/flow"
                                       ? "hsla(0,100%,100%,.05)"
                                       : "transparent",
                                   color: "white",
@@ -248,12 +223,12 @@ const Layout = ({ children, title = "Livepeer Product Discovery" }) => {
                                   },
                                 }}
                               >
-                                Create VOD
+                                Flow Verifiable Video
                               </Button>
                             </Link>
                           </Box>
                           <Box css={{}}>
-                            <Link passHref href="/video-on-demand/view">
+                            <Link passHref href="/view">
                               <Button
                                 size="3"
                                 css={{

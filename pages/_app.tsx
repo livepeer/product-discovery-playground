@@ -16,6 +16,18 @@ import { publicProvider } from "wagmi/providers/public";
 import { useApollo } from "../apollo";
 import "video-react/dist/video-react.css";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import {
+  createReactClient,
+  LivepeerConfig,
+  studioProvider,
+} from "@livepeer/react";
+
+const livepeerClient = createReactClient({
+  provider: studioProvider({
+    apiKey: process.env.NEXT_PUBLIC_LIVEPEER_API_KEY,
+    baseUrl: 'https://livepeer.monster/api',
+  }),
+});
 
 function App({ Component, pageProps }) {
   const client = useApollo(pageProps.initialApolloState);
@@ -69,25 +81,27 @@ function App({ Component, pageProps }) {
             theme={rainbowTheme}
             chains={chains}
           >
-            <ChakraProvider
-              theme={extendTheme({
-                styles: {
-                  global: {
-                    // styles for the `body`
-                    body: {
-                      bg: "hsl(155 7% 8.4%)",
-                      color: "white",
+            <LivepeerConfig client={livepeerClient}>
+              <ChakraProvider
+                theme={extendTheme({
+                  styles: {
+                    global: {
+                      // styles for the `body`
+                      body: {
+                        bg: "hsl(155 7% 8.4%)",
+                        color: "white",
+                      },
                     },
                   },
-                },
-              })}
-            >
-              <CookiesProvider>
-                <IdProvider>
-                  {getLayout(<Component {...pageProps} />)}
-                </IdProvider>
-              </CookiesProvider>
-            </ChakraProvider>
+                })}
+              >
+                <CookiesProvider>
+                  <IdProvider>
+                    {getLayout(<Component {...pageProps} />)}
+                  </IdProvider>
+                </CookiesProvider>
+              </ChakraProvider>
+            </LivepeerConfig>
           </RainbowKitProvider>
         </WagmiConfig>
       </ApolloProvider>

@@ -1,0 +1,42 @@
+{
+  "$id": "https://livepeer.name/json-schemas/attestation.schema.json",
+  "description": "Schema for the attestation object",
+  "type": "object",
+  "properties": {
+    "video": {
+      "title": "Video URL",
+      "type": "string",
+      "description": "The immutable URL of the video",
+      "pattern": "^ipfs://.*|^arweave.net/.*|^bzz:/.*"
+    },
+    "attestations": {
+      "type": "array",
+      "description": "List of attestations",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "Role of the attestor"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address of the attestor"
+          }
+        },
+        "required": ["role", "address"]
+      }
+    },
+    "signer": {
+      "title": "Signer address",
+      "type": "string",
+      "description": "The address of the signer"
+    },
+    "timestamp": {
+      "title": "Timestamp",
+      "type": "integer",
+      "description": "Timestamp of the message creation"
+    }
+  },
+  "required": ["video", "attestations", "signer", "timestamp"]
+}
