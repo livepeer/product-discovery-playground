@@ -54,6 +54,7 @@ const Viewer = () => {
   const [isUploading, setIsUploading] = useState(false);
 
   const [errorUpload, setErrorUpload] = useState("");
+  const [attestationId, setAttestationId] = useState("");
 
   const [fileUpload, setFileUpload] = useState<File | null>(null);
 
@@ -156,11 +157,11 @@ const Viewer = () => {
           }
         );
 
-        if (res.status === 200) {
+        if (res.ok) {
           const json: AttestationResponse = await res.json();
 
           if (json.id) {
-            // setIpfsHash(json.hash);
+            setAttestationId(json.id);
           }
         } else {
           setErrorUpload("Error uploading, please try again.");
@@ -262,7 +263,7 @@ const Viewer = () => {
             {jsonSchema && asset?.[0]?.storage?.ipfs?.url && (
               <Flex css={{}}>
                 <Button
-                  disabled={!fileUpload || isUploading}
+                  disabled={!fileUpload || isUploading || attestationId}
                   variant="primary"
                   size={2}
                   onClick={onSubmitMetadata}
@@ -281,14 +282,17 @@ const Viewer = () => {
                 <Box css={{ mt: "$4" }}>
                   <Spinner />
                 </Box>
+              ) : attestationId ? (
+                <a
+                  target="_blank"
+                  href={`https://experiment.lvpr.tv/?v=${attestationId}`}
+                  rel="noreferrer"
+                >
+                  <Button css={{ mt: "$2" }} variant="primary" size={2}>
+                    View Uploaded Video
+                  </Button>
+                </a>
               ) : (
-                // ipfsHash ? (
-                //   <Link passHref href={`/video-on-demand/view/${ipfsHash}`}>
-                //     <Button css={{ mt: "$2" }} variant="primary" size={2}>
-                //       View Uploaded Video
-                //     </Button>
-                //   </Link>
-                // ) :
                 <></>
               )}
             </Flex>
