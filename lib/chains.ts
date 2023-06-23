@@ -6,12 +6,6 @@ import { chain } from "wagmi";
 export const INFURA_KEY = process.env.NEXT_PUBLIC_INFURA_KEY;
 const NETWORK = process.env.NEXT_PUBLIC_NETWORK;
 
-if (typeof INFURA_KEY === "undefined" || typeof NETWORK === "undefined") {
-  throw new Error(
-    `NEXT_PUBLIC_INFURA_KEY and NETWORK must be defined environment variables`
-  );
-}
-
 export const AVERAGE_L1_BLOCK_TIME = 13; // ethereum blocks are confirmed on average 13 seconds
 
 const MAINNET_CONTRACTS = {
