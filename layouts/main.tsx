@@ -7,6 +7,7 @@ import { globalStyles } from "@lib/globalStyles";
 import * as fcl from "@onflow/fcl";
 import {
   Box,
+  Text,
   Button,
   Container,
   DesignSystemProvider,
@@ -30,6 +31,7 @@ import {
   useMutations,
   useOnClickOutside,
 } from "../hooks";
+import { background } from "@chakra-ui/react";
 
 const themeMap = {};
 Object.keys(themes).map(
@@ -78,18 +80,18 @@ const FlowWallet = () => {
 
   const AuthedState = () => {
     return (
-      <div>
-        <div>Address: {user?.addr ?? "No Address"}</div>
-        <button onClick={fcl.unauthenticate}>Log Out</button>
-      </div>
+      <Box>
+        <Text size="2">Address: {user?.addr ?? "No Address"}</Text>
+        <Button onClick={fcl.unauthenticate}>Disconnect</Button>
+      </Box>
     )
   }
 
   const UnauthenticatedState = () => {
     return (
-      <div>
-        <button onClick={auth}>Connect Wallet</button>
-      </div>
+      <Box>
+        <Button onClick={auth} css={{ background: "#113123",  color: "#4cc38a", fontSize: "16px" }}>Connect Wallet</Button>
+      </Box>
     )
   }
 
