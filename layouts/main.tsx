@@ -4,6 +4,7 @@ import Drawer from "@components/Drawer";
 import Hamburger from "@components/Hamburger";
 import Logo from "@components/Logo";
 import { globalStyles } from "@lib/globalStyles";
+import * as fcl from "@onflow/fcl";
 import {
   Box,
   Button,
@@ -43,11 +44,45 @@ type DrawerItem = {
   className?: string;
 };
 
-const Layout = ({ children, title = "Livepeer Product Discovery" }) => {
+const Layout = ({ children, title = "Livepeer Product Discovery", networkType="eth"}) => {
   const { pathname, asPath } = useRouter();
 
+  const [user, setUser] = useState({loggedIn: null})
+
+  useEffect(() => {fcl.currentUser.subscribe(setUser)}, [])
+
+  const auth = async () => {
+    try {
+      fcl.config({
+        "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
+        "flow.network": "testnet",
+        "accessNode.api": "https://access-testnet.onflow.org"
+      })
+
+      await fcl.authenticate();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const AuthedState = () => {
+    return (
+      <div>
+        <div>Address: {user?.addr ?? "No Address"}</div>
+        <button onClick={fcl.unauthenticate}>Log Out</button>
+      </div>
+    )
+  }
+
+  const UnauthenticatedState = () => {
+    return (
+      <div>
+        <button onClick={auth}>Connect Wallet</button>
+      </div>
+    )
+  }
+
   const mutations = useMutations();
-  const accountAddress = useAccountAddress();
   const activeChain = useActiveChain();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -244,34 +279,43 @@ const Layout = ({ children, title = "Livepeer Product Discovery" }) => {
                               },
                             }}
                           >
-                            <Image
-                              objectFit="contain"
-                              width={18}
-                              height={18}
-                              alt={
-                                (
-                                  CHAIN_INFO[activeChain?.id] ??
-                                  CHAIN_INFO[DEFAULT_CHAIN_ID]
-                                ).label
-                              }
-                              src={
-                                (
-                                  CHAIN_INFO[activeChain?.id] ??
-                                  CHAIN_INFO[DEFAULT_CHAIN_ID]
-                                ).logoUrl
-                              }
-                            />
-                            <Box css={{ ml: "8px" }}>
-                              {
-                                (
-                                  CHAIN_INFO[activeChain?.id] ??
-                                  CHAIN_INFO[DEFAULT_CHAIN_ID]
-                                ).label
-                              }
-                            </Box>
+                            { networkType === "eth" &&
+                              <Image
+                                objectFit="contain"
+                                width={18}
+                                height={18}
+                                alt={
+                                  (
+                                    CHAIN_INFO[activeChain?.id] ??
+                                    CHAIN_INFO[DEFAULT_CHAIN_ID]
+                                  ).label
+                                }
+                                src={
+                                  (
+                                    CHAIN_INFO[activeChain?.id] ??
+                                    CHAIN_INFO[DEFAULT_CHAIN_ID]
+                                  ).logoUrl
+                                }
+                              />
+                            }
+                            { networkType === "eth" &&
+                              <Box css={{ ml: "8px" }}>
+                                {
+                                  (
+                                    CHAIN_INFO[activeChain?.id] ??
+                                    CHAIN_INFO[DEFAULT_CHAIN_ID]
+                                  ).label
+                                }
+                              </Box>
+                            }
                           </Flex>
                           <Flex css={{ ai: "center", ml: "8px" }}>
-                            <ConnectButton showBalance={false} />
+                              { networkType === "eth" && <ConnectButton showBalance={false} /> }
+                              { networkType === "flow" && (user.loggedIn
+                                  ? <AuthedState />
+                                  : <UnauthenticatedState />
+                                )
+                              }
                           </Flex>
                         </Flex>
                       </Flex>
