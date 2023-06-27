@@ -7,6 +7,7 @@ import {
   Flex,
   Heading,
   Text,
+  TextArea,
 } from "@livepeer/design-system";
 import { useEffect, useState } from "react";
 import { useAccount, useSignTypedData } from "wagmi";
@@ -48,6 +49,11 @@ type AttestationResponse = {
     ];
   };
   signature: string;
+  storage: {
+    ipfs: {
+      cid: "abcdef"
+    }
+  }
 };
 
 const Main = ({networkType}) => {
@@ -59,11 +65,14 @@ const Main = ({networkType}) => {
   const [isUploading, setIsUploading] = useState(false);
 
   const [errorUpload, setErrorUpload] = useState("");
-  const [attestationId, setAttestationId] = useState("");
+  const [attestation, setAttestation] = useState<AttestationResponse | null>(null);
 
   const [fileUpload, setFileUpload] = useState<File | null>(null);
 
+  const [statusInfo, setStatusInfo] = useState("");
+
   const {
+    progress,
     isLoading,
     data: asset,
     error,
@@ -88,6 +97,40 @@ const Main = ({networkType}) => {
       mutate();
     }
   }, [fileUpload]);
+
+  useEffect(() => {
+    if (attestation) {
+      let message = "";
+      if (attestation.storage?.ipfs?.cid) {
+        message = `Attestation uploaded to IPFS: ipfs://${attestation.storage?.ipfs?.cid}`
+      } else {
+        message = `Attestation uploaded, storing to IPFS...`
+      }
+      message += "\n\n";
+      message += "Attestation Content:\n"
+      const attestationMetadata = {
+        primaryType: attestation.primaryType,
+        domain: attestation.domain,
+        message: attestation.message,
+        signature: attestation.signature,
+        signatureType: attestation.signatureType
+      }
+      message += JSON.stringify(attestationMetadata, null, 2)
+      setStatusInfo(message);
+    } else if (asset?.[0]?.storage?.ipfs?.url) {
+      setStatusInfo(`Video uploaded to IPFS: ${asset?.[0]?.storage?.ipfs?.url}`)
+    } else if (progress || fileUpload) {
+      if (progress?.[0].progress) {
+        setStatusInfo(`Video uploading (phase: ${progress[0].phase}, progress: ${Math.round(progress[0].progress * 100)}%)`)
+      } else {
+        setStatusInfo(`Video uploading...`)
+      }
+    } else if (isWalletConnected()) {
+      setStatusInfo("Upload a video.")
+    } else {
+      setStatusInfo("Connect wallet to upload a video.")
+    }
+  }, [progress, isLoading, asset, user, account, attestation, fileUpload]);
 
   const [jsonSchema, setJsonSchema] = useState<object | null>(null);
   const [signatureTypes, setSignatureTypes] = useState<Record<
@@ -138,6 +181,11 @@ const Main = ({networkType}) => {
         value: message,
       });
     } else if (networkType === "flow") {
+      fcl.config({
+        "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
+        "flow.network": "testnet",
+        "accessNode.api": "https://access-testnet.onflow.org"
+      })
       const signatures = await fcl
       .currentUser()
       .signUserMessage(Buffer.from(stringify(message)).toString("hex"));
@@ -177,7 +225,7 @@ const Main = ({networkType}) => {
           signature: signature,
         };
 
-        const res = await fetch(
+        let res = await fetch(
           "https://livepeer.monster/api/experiment/-/attestation",
           {
             method: "POST",
@@ -189,13 +237,18 @@ const Main = ({networkType}) => {
         );
 
         if (res.ok) {
-          const json: AttestationResponse = await res.json();
-
-          if (json.id) {
-            setAttestationId(json.id);
+          let json: AttestationResponse = await res.json();
+          const attestationId = json.id;
+          if (attestationId) {
+            while (!json?.storage?.ipfs?.cid) {
+              res = await fetch(`https://livepeer.monster/api/experiment/-/attestation/${attestationId}`);
+              json = await res.json();
+              setAttestation(json);
+              await (new Promise(resolve => setTimeout(resolve, 1000)))
+            }
           }
         } else {
-          setErrorUpload("Error uploading, please try again.");
+            setErrorUpload("Error uploading, please try again.");
         }
       } catch (e) {
         console.error(e);
@@ -257,7 +310,7 @@ const Main = ({networkType}) => {
               }}
             >
               <Flex css={{ flexDirection: "column" }}>
-                <Text size="2" css={{ fontWeight: 700 }}>
+                <Text size="2" css={{ fontWeight: 700, paddingBottom: "12px" }}>
                   Upload a video to IPFS
                 </Text>
 
@@ -292,19 +345,19 @@ const Main = ({networkType}) => {
             </Flex>
 
             {jsonSchema && asset?.[0]?.storage?.ipfs?.url && (
-              <Flex css={{}}>
+              <Flex css={{ paddingBottom:"2px" }}>
                 <Button
-                  disabled={!fileUpload || isUploading || attestationId}
+                  disabled={!fileUpload || isUploading || attestation }
                   variant="primary"
                   size={2}
                   onClick={onSubmitMetadata}
                 >
-                  Sign & Create Verifiable Video
+                  Sign & Create Attestation
                 </Button>
               </Flex>
             )}
 
-            <Flex css={{ justifyContent: "flex-end", alignItems: "center" }}>
+            <Flex>
               {errorUpload ? (
                 <Text css={{ color: "$red11", mt: "$3" }}>
                   {errorUpload || "Error with address."}
@@ -313,10 +366,10 @@ const Main = ({networkType}) => {
                 <Box css={{ mt: "$4" }}>
                   <Spinner />
                 </Box>
-              ) : attestationId ? (
+              ) : attestation?.id ? (
                 <a
                   target="_blank"
-                  href={`https://experiment.lvpr.tv/?v=${attestationId}`}
+                  href={`https://experiment.lvpr.tv/?v=${attestation?.storage?.ipfs?.cid}`}
                   rel="noreferrer"
                 >
                   <Button css={{ mt: "$2" }} variant="primary" size={2}>
@@ -326,6 +379,14 @@ const Main = ({networkType}) => {
               ) : (
                 <></>
               )}
+            </Flex>
+            <Flex css={{ paddingTop: "30px" }}>
+              <Flex css={{ flexDirection: "column", width: "500px" }}>
+                <Text size="2" css={{ fontWeight: 700, paddingBottom: "5px" }}>
+                  Status Info
+                </Text>
+                <TextArea readOnly={true} value={statusInfo}></TextArea>
+              </Flex>
             </Flex>
           </Box>
         </Flex>
