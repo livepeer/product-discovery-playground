@@ -56,6 +56,13 @@ type AttestationResponse = {
   }
 };
 
+const livepeerHost = () => {
+  if (process.env.NEXT_PUBLIC_LIVEPEER_ENV === "prod") {
+    return "https://livepeer.studio";
+  }
+  return "https://livepeer.monster";
+}
+
 const Main = ({networkType}) => {
   const account = useAccount();
 
@@ -226,7 +233,7 @@ const Main = ({networkType}) => {
         };
 
         let res = await fetch(
-          "https://livepeer.monster/api/experiment/-/attestation",
+          `${livepeerHost()}/api/experiment/-/attestation`,
           {
             method: "POST",
             headers: {
@@ -241,7 +248,7 @@ const Main = ({networkType}) => {
           const attestationId = json.id;
           if (attestationId) {
             while (!json?.storage?.ipfs?.cid) {
-              res = await fetch(`https://livepeer.monster/api/experiment/-/attestation/${attestationId}`);
+              res = await fetch(`${livepeerHost()}/api/experiment/-/attestation/${attestationId}`);
               json = await res.json();
               setAttestation(json);
               await (new Promise(resolve => setTimeout(resolve, 1000)))

@@ -22,10 +22,17 @@ import {
   studioProvider,
 } from "@livepeer/react";
 
+const livepeerHost = () => {
+  if (process.env.NEXT_PUBLIC_LIVEPEER_ENV === "prod") {
+    return "https://livepeer.studio";
+  }
+  return "https://livepeer.monster";
+}
+
 const livepeerClient = createReactClient({
   provider: studioProvider({
     apiKey: process.env.NEXT_PUBLIC_LIVEPEER_API_KEY,
-    baseUrl: 'https://livepeer.monster/api',
+    baseUrl: `${livepeerHost()}/api`,
   }),
 });
 
