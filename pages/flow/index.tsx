@@ -1,14 +1,13 @@
 import Layout from "@layouts/main";
-import Main from "./main"
-
+import Main from "../main"
 
 const Viewer = () => {
-  return <Main networkType="eth"></Main>
+  return <Main networkType="flow"></Main>
 }
 
 Viewer.getLayout = (page) => {
   return (
-    <Layout networkType="eth">
+    <Layout networkType="flow">
       {page}
     </Layout>
   )

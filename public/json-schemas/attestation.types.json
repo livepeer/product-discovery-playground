@@ -1,0 +1,11 @@
+{
+  "Video": [
+    { "name": "video", "type": "string" },
+    { "name": "attestations", "type": "Attestation[]" },
+    { "name": "timestamp", "type": "uint256" }
+  ],
+  "Attestation": [
+    { "name": "role", "type": "string" },
+    { "name": "address", "type": "address" }
+  ]
+}
