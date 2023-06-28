@@ -238,6 +238,7 @@ const Main = ({networkType}) => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${process.env.NEXT_PUBLIC_LIVEPEER_API_KEY}`
             },
             body: JSON.stringify(data),
           }
@@ -248,7 +249,15 @@ const Main = ({networkType}) => {
           const attestationId = json.id;
           if (attestationId) {
             while (!json?.storage?.ipfs?.cid) {
-              res = await fetch(`${livepeerHost()}/api/experiment/-/attestation/${attestationId}`);
+              res = await fetch(`${livepeerHost()}/api/experiment/-/attestation/${attestationId}`,
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${process.env.NEXT_PUBLIC_LIVEPEER_API_KEY}`
+                },
+              });
+              
               json = await res.json();
               setAttestation(json);
               await (new Promise(resolve => setTimeout(resolve, 1000)))
