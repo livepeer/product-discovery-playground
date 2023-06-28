@@ -66,7 +66,7 @@ const livepeerHost = () => {
 const Main = ({networkType}) => {
   const account = useAccount();
 
-  const [user, setUser] = useState({loggedIn: null})
+  const [user, setUser] = useState<any>({loggedIn: null})
   useEffect(() => {fcl.currentUser.subscribe(setUser)}, [])
 
   const [isUploading, setIsUploading] = useState(false);

@@ -60,7 +60,7 @@ const FlowLogo = () => {
 }
 
 const FlowWallet = () => {
-  const [user, setUser] = useState({loggedIn: null})
+  const [user, setUser] = useState<any>({loggedIn: null})
 
   useEffect(() => {fcl.currentUser.subscribe(setUser)}, [])
 
