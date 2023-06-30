@@ -63,6 +63,13 @@ const livepeerHost = () => {
   return "https://livepeer.monster";
 }
 
+const lvprTv = () => {
+  if (process.env.NEXT_PUBLIC_LIVEPEER_ENV === "prod") {
+    return "https://lvpr.tv";
+  }
+  return "https://experiment.lvpr.tv";
+}
+
 const Main = ({networkType}) => {
   const account = useAccount();
 
@@ -385,7 +392,7 @@ const Main = ({networkType}) => {
               ) : attestation?.id ? (
                 <a
                   target="_blank"
-                  href={`https://experiment.lvpr.tv/?v=${attestation?.storage?.ipfs?.cid}`}
+                  href={`${lvprTv()}/?v=${attestation?.storage?.ipfs?.cid}`}
                   rel="noreferrer"
                 >
                   <Button css={{ mt: "$2" }} variant="primary" size={2}>
