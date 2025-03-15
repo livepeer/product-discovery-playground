@@ -137,7 +137,7 @@ const Index = ({ items = [], open, onDrawerOpen, onDrawerClose }) => {
               
               <A
                 css={{ fontSize: "$2", mb: "$2", display: "block" }}
-                href="https://discord.gg/uaPhtyrWsF"
+                href="https://discord.gg/livepeer"
                 target="_blank"
                 rel="noopener noreferrer"
               >
